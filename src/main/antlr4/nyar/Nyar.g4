@@ -1,35 +1,35 @@
 grammar Nyar;
-program: statement+;
+import NyarOperators, NyarKeywords;
 // $antlr-format useTab false ;reflowComments false;
 // $antlr-format alignColons hanging;
+program: elements? EOF;
+elements: element+;
+element: statement | functionDeclaration;
+
 statement
-    : expression ';'                 # cal_stat
-    | SYMBOL '=' expression ';'      # assign
-    | 'print' '(' expression ')' ';' # print;
+    : expression EOS            # singleStatement
+    | SYMBOL '=' expression EOS # assignStatement;
+expression // High computing priority in the front
+    : left = expression op = BinaryOperator right = expression            # Binary_Like
+    | left = expression op = LogicOperator right = expression             # Logic_Like
+    | <assoc = right> left = expression op = PowerLike right = expression # Power_Like
+    | left = expression op = MultiplyLike right = expression              # Multiply_Like
+    | left = expression op = AddLike right = expression                   # Plus_Like
+    | left = expression op = ListOperator right = expression              # List_Like
+    | atom = STRING                                                       # String
+    | atom = NUMBER                                                       # Number
+    | atom = SYMBOL                                                       # Symbol
+    | LS expression RS                                                    # PriorityOperation;
 
-expression
-    : <assco = right>expression POW expression     # pow_Like
-    | expression op = (MUL | DIV | MOD) expression # mul_Like
-    | expression op = (ADD | SUB) expression       # add_Like
-    | sign = (ADD | SUB)? Number                   # number
-    | SYMBOL                                       # symbol
-    | '(' expression ')'                           # parens;
+functionDeclaration
+    : Type SYMBOL '(' formalParameterList? ')' '{' functionBody '}';
 
+/// FormalParameterList : / SYMBOL / FormalParameterList , SYMBOL
+formalParameterList: SYMBOL ( ',' SYMBOL)*;
+
+/// FunctionBody : / SourceElements?
+functionBody: elements?;
+EOS: Semicolon | EOF;
 // $antlr-format alignColons trailing;
-Number : INTEGER | FLOAT;
-
-MUL : '*';
-DIV : '/';
-ADD : '+';
-SUB : '-';
-POW : '^';
-MOD : '%';
-
-SYMBOL : [a-zA-Z]+ [0-9a-zA-Z]*;
-
-ZERO          : '0';
-INTEGER       : [1-9][0-9]* | ZERO;
-FLOAT         : INTEGER '.' [0-9]+;
-COMMENT_LINE  : '//' .*? '\r'? '\n' -> skip;
-COMMENT_BLOCK : '/*' .*? '*/' -> skip;
-WS            : [\t\r\n] -> skip;
+//list : LM (expression Comma?)* RM; record : LL (keyValue Comma?)* RL; keyValue : key = SYMBOL
+// Colon value = expression; mathAlias : alias = MathConstant;
