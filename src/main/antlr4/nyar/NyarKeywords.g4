@@ -67,24 +67,10 @@ SYMBOL              : NameStartCharacter NameCharacter*;
 STRING              : '"' .*? '"';
 INTEGER             : Digit+;
 FLOAT               : Digit+ ('.' Digit+)?;
-WhiteSpace          : [\n\t\r]+ -> skip;
-NewLine             : ('\r'? '\n' | '\r')+ -> channel(HIDDEN);
-Comment             : '%%%' .*? '%%%' -> channel(HIDDEN);
-
 // $antlr-format alignColons hanging;
 
-fragment NameCharacter
-    : NameStartCharacter
-    | Digit
-    | '\u00B7'
-    | '\u0300' ..'\u036F'
-    | '\u203F' ..'\u2040';
+fragment NameCharacter: NameStartCharacter | Digit;
 fragment NameStartCharacter
     : [:a-zA-Z] // Letter
-    | '_'
-    | '\u2070' ..'\u218F'
-    | '\u2C00' ..'\u2FEF'
-    | '\u3001' ..'\uD7FF'
-    | '\uF900' ..'\uFDCF'
-    | '\uFDF0' ..'\uFFFD';
+    | '_';
 // May Allow # $ % with special meaning English + Chinese + Japanese + Greeks

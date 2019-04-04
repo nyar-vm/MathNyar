@@ -1,7 +1,28 @@
 lexer grammar NyarOperators;
 // $antlr-format useTab false ;reflowComments false;
-// $antlr-format alignColons trailing;
+// $antlr-format alignColons hanging
+AssignmentOperator: Set | DelayedSet;
+BinaryOperator: LeftShift | RightShift;
+LogicOperator
+    : Equal
+    | NotEqual
+    | Equivalent
+    | NotEquivalent
+    | Grater
+    | GraterEqual
+    | Less
+    | LessEqual;
+PowerLike: Power | Root;
+MultiplyLike
+    : Divide
+    | Times
+    | Multiply
+    | Kronecker
+    | TensorProduct;
+PlusLike: Plus | Minus;
+ListOperator: Concat;
 
+// $antlr-format alignColons trailing;
 // Brackets Pair
 LS     : '(';
 RS     : ')';
@@ -30,11 +51,9 @@ Grater     : '>';
  */
 
 // Six Basic Arithmetic
-Plus3    : '+++';
 Increase : '++';
 Plus     : '+';
 //Unknow1      : '\u2295'; //U+2295 ⊕
-Minus3   : '---';
 Decrease : '--';
 Minus    : '-';
 //Unknow2      : '\u2296'; //U+2296 ⊖
@@ -87,8 +106,6 @@ Quotation : '\'';
 
 // Set Operators SetConstant : '=<';
 DelayedSet : ':=' | '\u2254'; //U+2254 ≔
-//SetAddTo : '+='; SetMinusFrom : '-='; SetTimesTo : '*='; SetDivideFrom : '/='; SetModTo : '%=';
-// SetPowerTo : '^='; Clean : '=.';
 
 //
 Map    : '/@';
@@ -107,24 +124,3 @@ Multiply      : '\u00D7'; // U+00D7 ×
 Kronecker     : '\u2297'; // U+2297 ⊗
 TensorProduct : '\u2299'; // U+2299 ⊙
 
-// $antlr-format alignColons hanging
-AssignmentOperator: Set | DelayedSet;
-BinaryOperator: LeftShift | RightShift;
-LogicOperator
-    : Equal
-    | NotEqual
-    | Equivalent
-    | NotEquivalent
-    | Grater
-    | GraterEqual
-    | Less
-    | LessEqual;
-PowerLike: Power | Root;
-MultiplyLike
-    : Divide
-    | Times
-    | Multiply
-    | Kronecker
-    | TensorProduct;
-AddLike: Plus | Minus;
-ListOperator: Concat;
