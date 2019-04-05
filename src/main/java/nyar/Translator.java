@@ -3,24 +3,20 @@ package nyar;
 public class Translator extends NyarBaseVisitor<String> {
     public String visitProgram(NyarParser.ProgramContext ctx) {
         String result = "";
-        for (int i = 0; i < ctx.getChildCount(); i++) {
-            System.out.print("Statement: " + ctx.statement(i).getText() + "\n");
-            result += this.visit(ctx.statement(i));
+        for (int i = 1; i < ctx.getChildCount(); i++) {
+            //System.out.print("Statement: " + ctx.statement(i-1).getText() + "\n");
+            result += this.visit(ctx.statement(i-1));
         }
         return result;
     }
 
     public String visitStatement(NyarParser.StatementContext ctx) {
         String result = "";
-        /*
         if (ctx.block() != null) {
             result += this.visit(ctx.block());
-            //System.out.print("Block: " + result + "\n");
         }
-        */
         if (ctx.emptyStatement() != null) {
             result += this.visit(ctx.emptyStatement());
-            //System.out.print("Empty: " + result + "\n");
         }
         if (ctx.expressionStatement() != null) {
             result += this.visit(ctx.expressionStatement());
@@ -33,15 +29,15 @@ public class Translator extends NyarBaseVisitor<String> {
     }
 
     public String visitEmptyStatement(NyarParser.EmptyStatementContext ctx) {
-        System.out.print("!! EmptyStatement\n");
-        return visitChildren(ctx);
+        //System.out.print("EmptyStatement!!\n");
+        return "Null";
     }
 
     public String visitExpressionStatement(NyarParser.ExpressionStatementContext ctx) {
         String result = "";
-        for (int i = 0; i < ctx.getChildCount(); i++) {
-            System.out.print("Expression: " + ctx.expression(i).getText() + "\n");
-            result += this.visit(ctx.expression(i));
+        for (int i = 1; i < ctx.getChildCount(); i++) {
+            //System.out.print("Expression: " + ctx.expression(i-1).getText() + "\n");
+            result += this.visit(ctx.expression(i-1));
         }
         return result;
     }
@@ -71,7 +67,7 @@ public class Translator extends NyarBaseVisitor<String> {
     public String visitPlus_Like(NyarParser.Plus_LikeContext ctx) {
         String lhs = this.visit(ctx.left);
         String rhs = this.visit(ctx.right);
-        System.out.printf("Operator: %s (%s,%s);\n", ctx.op.getText(), lhs, rhs);
+        //System.out.printf("Operator: %s (%s,%s);\n", ctx.op.getText(), lhs, rhs);
         switch (ctx.op.getText()) {
             case "+":
                 return String.format("Plus[%s,%s]", lhs, rhs);

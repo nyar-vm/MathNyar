@@ -19,8 +19,8 @@ public class Main {
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         NyarParser parser = new NyarParser(tokens);
         NyarVisitor translator = new Translator();
-        String MExpression = String.format("%s",translator.visit(parser.program()));
-        System.out.printf("%s", MExpression);
+        String MExpression = String.format("%s", translator.visit(parser.program()));
+        System.out.printf("==============================\nProgram: %s", MExpression);
 
         try {
             BufferedWriter out = new BufferedWriter(new FileWriter(output));
