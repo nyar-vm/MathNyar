@@ -1,0 +1,15 @@
+1;
+2;
+Times[3,4];
+null;
+1;
+2;
+3;
+4;
+null;
+Power[4,Power[3,2]];
+Surd[Surd[4,3],2];
+null;
+Power[4,Power[3,2]];
+Surd[Surd[4,3],2];
+null;
