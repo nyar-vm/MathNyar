@@ -35,6 +35,10 @@ Final     : 'final';
 /* Function */
 Let : 'let';
 
+/* Condition */
+If   : 'if';
+Else : 'else';
+
 /* Loop */
 Try   : 'try';
 Catch : 'catch';

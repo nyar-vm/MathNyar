@@ -8,9 +8,11 @@ statement
     : block
     | emptyStatement
     | expressionStatement
-    | assignStatement;
+    | assignStatement
+    | ifStatement;
 /*====================================================================================================================*/
 block: '{' statement+? '}';
+expr_block: block | expression;
 /*====================================================================================================================*/
 emptyStatement: eos;
 eos: Semicolon;
@@ -56,6 +58,11 @@ assign_ops
     | FinalAssign;
 lazy_assign: DelayedAssign;
 assign_mods: Let | Final;
+/*====================================================================================================================*/
+ifStatement: If condition elseifStatement (Else expr_block)?  eos?;
+elseifStatement: (Else If condition)*;
+condition: '('? expression expr_block ')'?;
+/*====================================================================================================================*/
 // literalSatement: arrayLiteral; arrayLiteral: '[' elementList? ','? elision? ']'; elision: ','+;
 
 // $antlr-format alignColons trailing;

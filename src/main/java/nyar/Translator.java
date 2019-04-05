@@ -24,6 +24,9 @@ public class Translator extends NyarBaseVisitor<String> {
         if (ctx.assignStatement() != null) {
             result += this.visit(ctx.assignStatement());
         }
+        if (ctx.ifStatement() != null) {
+            result += this.visit(ctx.ifStatement());
+        }
         return String.format("%s;", result);
     }
 
@@ -64,13 +67,10 @@ public class Translator extends NyarBaseVisitor<String> {
         }
     }
 
-
-
-
     public String visitOperatorAssignExpression(NyarParser.OperatorAssignExpressionContext ctx) {
         String id = ctx.id.getText();
         String expr = this.visit(ctx.expression());
-        System.out.printf("Set[%s,%s];\n", id, expr);
+        //System.out.printf("Set[%s,%s];\n", id, expr);
         return String.format("Set[%s,%s]", id, expr);
     }
 
@@ -134,4 +134,35 @@ public class Translator extends NyarBaseVisitor<String> {
         return ctx.getText();
     }
 
+    public String visitIfStatement(NyarParser.IfStatementContext ctx) {
+        int else_count = ctx.elseifStatement().Else().size();
+        int then_count = 0;
+        if (ctx.Else() != null) {
+            then_count += 1;
+        }
+        //System.out.printf("If Statement: %s\n", ctx.getText());
+        //System.out.printf("ElseIf Count: %s\n", else_count + then_count);
+        switch (else_count + then_count) {
+            case 0: {
+                String cond = this.visit(ctx.condition().expression());
+                String then = this.visit(ctx.condition().expr_block());
+                System.out.printf("Nyar`Core`If[%s,%s];\n", cond, then);
+                return String.format("Nyar`Core`If[%s,%s]", cond, then);
+            }
+            case 1: {
+                String cond = this.visit(ctx.condition().expression());
+                String then = this.visit(ctx.condition().expr_block());
+                String expr = this.visit(ctx.expr_block());
+                System.out.printf("Nyar`Core`If[%s,%s,%s];\n", cond, then, expr);
+                return String.format("Nyar`Core`If[%s,%s,%s]", cond, then, expr);
+            }
+            default: {
+                String cond = this.visit(ctx.condition().expression());
+                String then = this.visit(ctx.condition().expr_block());
+                String expr = this.visit(ctx.expr_block());
+                System.out.printf("Switch[%s,%s,___,%s];\n", cond, then, expr);
+                return String.format("Switch[%s,%s,___,%s]", cond, then, expr);
+            }
+        }
+    }
 }
