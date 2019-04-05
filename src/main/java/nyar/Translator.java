@@ -84,15 +84,42 @@ public class Translator extends NyarBaseVisitor<String> {
     public String visitPlus_Like(NyarParser.Plus_LikeContext ctx) {
         String lhs = this.visit(ctx.left);
         String rhs = this.visit(ctx.right);
-
-        System.out.printf("Operator: %s (%s,%s);\n", ctx.op.getText(), ctx.op.getType(), NyarParser.Plus);
-        switch (ctx.op.getType()) {
-            case NyarParser.Plus:
+        //System.out.printf("Operator: %s (%s,%s);\n", ctx.op.getText(), lhs, rhs);
+        switch (ctx.op.getText()) {
+            case "+":
                 return String.format("Plus[%s,%s]", lhs, rhs);
-            case NyarParser.Minus:
+            case "-":
                 return String.format("Subtract[%s,%s]", lhs, rhs);
             default:
-                return "";
+                return String.format("UnknowOperator[%s,%s]", lhs, rhs);
+        }
+    }
+
+    public String visitMultiply_Like(NyarParser.Multiply_LikeContext ctx) {
+        String lhs = this.visit(ctx.left);
+        String rhs = this.visit(ctx.right);
+        System.out.printf("Operator: %s (%s,%s);\n", ctx.op.getText(), lhs, rhs);
+        switch (ctx.op.getText()) {
+            case "*":
+                return String.format("Times[%s,%s]", lhs, rhs);
+            case "/":
+                return String.format("Divide[%s,%s]", lhs, rhs);
+            default:
+                return String.format("UnknowOperator[%s,%s]", lhs, rhs);
+        }
+    }
+
+    public String visitPower_Like(NyarParser.Power_LikeContext ctx) {
+        String lhs = this.visit(ctx.left);
+        String rhs = this.visit(ctx.right);
+        System.out.printf("Operator: %s (%s,%s);\n", ctx.op.getText(), lhs, rhs);
+        switch (ctx.op.getText()) {
+            case "^":
+                return String.format("Power[%s,%s]", lhs, rhs);
+            case "√":
+                return String.format("Surd[%s,%s]", rhs, lhs);
+            default:
+                return String.format("UnknowOperator[%s,%s]", lhs, rhs);
         }
     }
 
