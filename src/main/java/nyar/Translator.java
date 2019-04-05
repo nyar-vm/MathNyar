@@ -62,6 +62,8 @@ public class Translator extends NyarBaseVisitor<String> {
                 return String.format("Plus[%s]", expr);
             case "-":
                 return String.format("Minus[%s]", expr);
+            case "!":
+                return String.format("Not[%s]", expr);
             default:
                 return String.format("UnknowOperator[%s]", expr);
         }
@@ -134,6 +136,24 @@ public class Translator extends NyarBaseVisitor<String> {
         return ctx.getText();
     }
 
+    public String visitLogic_Like(NyarParser.Logic_LikeContext ctx) {
+        String lhs = this.visit(ctx.left);
+        String rhs = this.visit(ctx.right);
+        //System.out.printf("Operator: %s (%s,%s);\n", ctx.op.getText(), lhs, rhs);
+        switch (ctx.op.getText()) {
+            case ">":
+                return String.format("Greater[%s,%s]", lhs, rhs);
+            case "<":
+                return String.format("Less[%s,%s]", lhs, rhs);
+            case "==":
+                return String.format("Equal[%s,%s]", lhs, rhs);
+            case "!=":
+                return String.format("Unequal[%s,%s]", lhs, rhs);
+            default:
+                return String.format("UnknowOperator[%s,%s]", lhs, rhs);
+        }
+    }
+
     public String visitIfStatement(NyarParser.IfStatementContext ctx) {
         int else_count = ctx.elseifStatement().Else().size();
         int then_count = 0;
@@ -146,22 +166,40 @@ public class Translator extends NyarBaseVisitor<String> {
             case 0: {
                 String cond = this.visit(ctx.condition().expression());
                 String then = this.visit(ctx.condition().expr_block());
-                System.out.printf("Nyar`Core`If[%s,%s];\n", cond, then);
                 return String.format("Nyar`Core`If[%s,%s]", cond, then);
             }
             case 1: {
                 String cond = this.visit(ctx.condition().expression());
                 String then = this.visit(ctx.condition().expr_block());
-                String expr = this.visit(ctx.expr_block());
-                System.out.printf("Nyar`Core`If[%s,%s,%s];\n", cond, then, expr);
-                return String.format("Nyar`Core`If[%s,%s,%s]", cond, then, expr);
+                if (then_count == 1) {
+                    return String.format(
+                            "Nyar`Core`If[%s,%s,%s]", cond, then,
+                            this.visit(ctx.expr_block())
+                    );
+                } else {
+                    return String.format(
+                            "Nyar`Core`ElseIf[%s,%s,%s,%s]", cond, then,
+                            this.visit(ctx.elseifStatement().condition(0).expression()),
+                            this.visit(ctx.elseifStatement().condition(0).expr_block())
+                    );
+                }
             }
             default: {
                 String cond = this.visit(ctx.condition().expression());
                 String then = this.visit(ctx.condition().expr_block());
                 String expr = this.visit(ctx.expr_block());
-                System.out.printf("Switch[%s,%s,___,%s];\n", cond, then, expr);
-                return String.format("Switch[%s,%s,___,%s]", cond, then, expr);
+                String result = "Nyar`Core`ElseIf[";
+                for (int i = 0; i < else_count; i++) {
+                    result += this.visit(ctx.elseifStatement().condition(i).expression()) + ","
+                            + this.visit(ctx.elseifStatement().condition(i).expr_block()) + ",";
+                    //result += this.visit(ctx.elseifStatement().condition(i));
+                }
+                if (then_count == 1) {
+                    result += this.visit(ctx.expr_block()) + "]";
+                } else {
+                    result += "]";
+                }
+                return result;
             }
         }
     }
