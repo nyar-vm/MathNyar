@@ -4,7 +4,7 @@ import NyarOperators, NyarKeywords;
 // $antlr-format alignColons hanging;
 program: statement* EOF;
 //elementList: elision? expression ( ',' elision? expression)*;
-statement: block|emptyStatement | expressionStatement;
+statement: block | emptyStatement | expressionStatement;
 /*====================================================================================================================*/
 block: '{' statement+? '}';
 /*====================================================================================================================*/
@@ -13,7 +13,8 @@ eos: Semicolon;
 /*====================================================================================================================*/
 expressionStatement: expression (',' expression)* eos?;
 expression // High computing priority in the front
-    : left = expression op = bit_ops right = expression                 # Binary_Like
+    : op = prefix_ops expression                                        # PrefixExpression
+    | left = expression op = bit_ops right = expression                 # Binary_Like
     | left = expression op = logic_ops right = expression               # Logic_Like
     | <assoc = right> left = expression op = pow_ops right = expression # Power_Like
     | left = expression op = mul_ops right = expression                 # Multiply_Like
@@ -46,7 +47,6 @@ pow_ops: Power | Root;
 mul_ops: Divide | Times | Multiply | Kronecker | TensorProduct;
 add_ops: Plus | Minus;
 list_ops: Concat;
-//op = PrefixOperator expression # PrefixExpression |
 /*====================================================================================================================*/
 // literalSatement: arrayLiteral; arrayLiteral: '[' elementList? ','? elision? ']'; elision: ','+;
 

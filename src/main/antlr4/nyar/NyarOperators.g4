@@ -1,27 +1,5 @@
 lexer grammar NyarOperators;
 // $antlr-format useTab false ;reflowComments false;
-// $antlr-format alignColons hanging
-AssignmentOperator: Set | DelayedSet;
-BinaryOperator: LeftShift | RightShift;
-LogicOperator
-    : Equal
-    | NotEqual
-    | Equivalent
-    | NotEquivalent
-    | Grater
-    | GraterEqual
-    | Less
-    | LessEqual;
-PowerLike: Power | Root;
-MultiplyLike
-    : Divide
-    | Times
-    | Multiply
-    | Kronecker
-    | TensorProduct;
-PlusLike: Plus | Minus;
-ListOperator: Concat;
-
 // $antlr-format alignColons trailing;
 // Brackets Pair
 LS     : '(';
@@ -34,8 +12,8 @@ LCeil  : '\u2308'; //U+02308 ⌈
 RCeil  : '\u2309'; //U+02309 ⌉
 LFloor : '\u230A'; //U+0230A ⌊
 RFloor : '\u230B'; //U+0230B ⌋
-LAngle : '\u27E8'; //U+027E8 ⟨
-RAngle : '\u27E9'; //U+027E9 ⟩
+LAngle : '<|' | '\u27E8'; //U+027E8 ⟨
+RAngle : '|>' | '\u27E9'; //U+027E9 ⟩
 
 // Angle Brackets
 Import     : '<<<' | '\u22D8'; // U+22D8 ⋘
@@ -73,15 +51,21 @@ Root      : '\u221A'; //U+221A √
 //Logic Operators
 Equivalent    : '===';
 Equal         : '==';
-Set           : '=';
+Assign        : '=';
 NotEqual      : '!=' | '\u2260'; //U+2260 ≠
 NotEquivalent : '=!=';
 GraterEqual   : '>=';
 LessEqual     : '<=';
-Bar3          : '|||';
 Bar2          : '||';
 Bar           : '|';
 // ∧(2227) & && ∨(2228) ∩(2229) ∪(222A)
+
+DelayedAssign : ':=' | '\u2254'; //U+2254 ≔
+LetAssign     : '@=';
+FinalAssign   : '#=';
+PlusTo        : '+=';
+MinusFrom     : '-=';
+//SetTimesTo : '*='; SetDivideFrom : '/='; SetModTo : '%='; SetPowerTo : '^='; Clean : '=.';
 
 //Lambda
 SlotSequence      : '##';
@@ -104,9 +88,6 @@ Dot       : '.';
 Comma     : ',';
 Quotation : '\'';
 
-// Set Operators SetConstant : '=<';
-DelayedSet : ':=' | '\u2254'; //U+2254 ≔
-
 //
 Map    : '/@';
 MapAll : '//@';
@@ -122,5 +103,4 @@ Unknow6 : '<=>' | '\u27FA'; //U+27FA ⟺
 // LinearMod : '|%'; LinearPower : '|^';
 Multiply      : '\u00D7'; // U+00D7 ×
 Kronecker     : '\u2297'; // U+2297 ⊗
-TensorProduct : '\u2299'; // U+2299 ⊙
-
+TensorProduct : '\u2299'; // U+2299 ⊙bitlikebit_opslogic_opsmul_opsadd_opslist_opspow_opsprefix_ops

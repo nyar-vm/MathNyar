@@ -5,6 +5,6 @@ Null;
 Null;
 Null;
 Null;
-Times[Plus[1,Subtract[2,3]],4];
+Times[Subtract[1,Plus[2,3]],Minus[4]];
 Subtract[Power[4,Power[3,2]],Surd[Surd[4,3],2]];
 Subtract[Power[4,Power[3,2]],Surd[Surd[4,3],2]];

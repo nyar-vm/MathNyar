@@ -2,12 +2,12 @@ package nyar;
 
 public class Translator extends NyarBaseVisitor<String> {
     public String visitProgram(NyarParser.ProgramContext ctx) {
-        String result = "";
+        StringBuilder result = new StringBuilder();
         for (int i = 1; i < ctx.getChildCount(); i++) {
             //System.out.print("Statement: " + ctx.statement(i-1).getText() + "\n");
-            result += this.visit(ctx.statement(i-1));
+            result.append(this.visit(ctx.statement(i - 1)));
         }
-        return result;
+        return result.toString();
     }
 
     public String visitStatement(NyarParser.StatementContext ctx) {
@@ -34,18 +34,31 @@ public class Translator extends NyarBaseVisitor<String> {
     }
 
     public String visitExpressionStatement(NyarParser.ExpressionStatementContext ctx) {
-        String result = "";
+        StringBuilder result = new StringBuilder();
         for (int i = 1; i < ctx.getChildCount(); i++) {
             //System.out.print("Expression: " + ctx.expression(i-1).getText() + "\n");
-            result += this.visit(ctx.expression(i-1));
+            result.append(this.visit(ctx.expression(i - 1)));
         }
-        return result;
+        return result.toString();
     }
 
     public String visitPriorityExpression(NyarParser.PriorityExpressionContext ctx) {
         String expression = this.visit(ctx.expression());
         //System.out.print("Priority: " + ctx.expression().getText() + "\n");
         return String.format("%s", expression);
+    }
+
+    public String visitPrefixExpression(NyarParser.PrefixExpressionContext ctx) {
+        String expr = this.visit(ctx.expression());
+        //System.out.printf("Operator: %s (%s);\n", ctx.op.getText(), expr);
+        switch (ctx.op.getText()) {
+            case "+":
+                return String.format("Plus[%s]", expr);
+            case "-":
+                return String.format("Minus[%s]", expr);
+            default:
+                return String.format("UnknowOperator[%s]", expr);
+        }
     }
 
     /*
