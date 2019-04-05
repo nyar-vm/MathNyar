@@ -1,6 +1,8 @@
 # IDE
-*.iml
 .idea/
+.vscode/
+.vs/
+*.iml
 
 # Java
 target/

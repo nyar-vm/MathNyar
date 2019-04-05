@@ -63,6 +63,11 @@ public class Translator extends NyarBaseVisitor<String> {
         return result;
     }
 
+    public String visitPriorityOperation(NyarParser.PriorityOperationContext ctx) {
+        String expression = this.visit(ctx.expression());
+        System.out.print("Priority: " + ctx.expression().getText() + "\n");
+        return String.format("%s", expression);
+    }
 
 
     /*
@@ -98,7 +103,7 @@ public class Translator extends NyarBaseVisitor<String> {
     public String visitMultiply_Like(NyarParser.Multiply_LikeContext ctx) {
         String lhs = this.visit(ctx.left);
         String rhs = this.visit(ctx.right);
-        System.out.printf("Operator: %s (%s,%s);\n", ctx.op.getText(), lhs, rhs);
+        //System.out.printf("Operator: %s (%s,%s);\n", ctx.op.getText(), lhs, rhs);
         switch (ctx.op.getText()) {
             case "*":
                 return String.format("Times[%s,%s]", lhs, rhs);
@@ -112,7 +117,7 @@ public class Translator extends NyarBaseVisitor<String> {
     public String visitPower_Like(NyarParser.Power_LikeContext ctx) {
         String lhs = this.visit(ctx.left);
         String rhs = this.visit(ctx.right);
-        System.out.printf("Operator: %s (%s,%s);\n", ctx.op.getText(), lhs, rhs);
+        //System.out.printf("Operator: %s (%s,%s);\n", ctx.op.getText(), lhs, rhs);
         switch (ctx.op.getText()) {
             case "^":
                 return String.format("Power[%s,%s]", lhs, rhs);
