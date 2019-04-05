@@ -4,7 +4,11 @@ import NyarOperators, NyarKeywords;
 // $antlr-format alignColons hanging;
 program: statement* EOF;
 //elementList: elision? expression ( ',' elision? expression)*;
-statement: block | emptyStatement | expressionStatement;
+statement
+    : block
+    | emptyStatement
+    | expressionStatement
+    | assignStatement;
 /*====================================================================================================================*/
 block: '{' statement+? '}';
 /*====================================================================================================================*/
@@ -20,18 +24,11 @@ expression // High computing priority in the front
     | left = expression op = mul_ops right = expression                 # Multiply_Like
     | left = expression op = add_ops right = expression                 # Plus_Like
     | left = expression op = list_ops right = expression                # List_Like
-    | left = expression op = assign_ops right = expression              # Assignment
+    | <assoc = right> id = SYMBOL mod = assign_ops expr = expression    # OperatorAssignExpression
     | atom = STRING                                                     # String
     | atom = NUMBER                                                     # Number
     | atom = SYMBOL                                                     # Symbol
     | '(' expression ')'                                                # PriorityExpression;
-assign_ops
-    : Assign
-    | DelayedAssign
-    | PlusTo
-    | MinusFrom
-    | LetAssign
-    | FinalAssign;
 prefix_ops: Plus | Minus | Bang;
 bit_ops: LeftShift | RightShift;
 logic_ops
@@ -48,6 +45,17 @@ mul_ops: Divide | Times | Multiply | Kronecker | TensorProduct;
 add_ops: Plus | Minus;
 list_ops: Concat;
 /*====================================================================================================================*/
+assignStatement
+    : mod = assign_mods id = SYMBOL expr = expression eos? # ModifierAssignExpression
+    | mod = assign_mods id = SYMBOL expr = block eos?      # ModifierAssignBlock;
+assign_ops
+    : Assign
+    | PlusTo
+    | MinusFrom
+    | LetAssign
+    | FinalAssign;
+lazy_assign: DelayedAssign;
+assign_mods: Let | Final;
 // literalSatement: arrayLiteral; arrayLiteral: '[' elementList? ','? elision? ']'; elision: ','+;
 
 // $antlr-format alignColons trailing;

@@ -1,18 +1,9 @@
 lexer grammar NyarKeywords;
+STRING: SimpleString;
+NUMBER: Integer | Float;
 // $antlr-format useTab false; reflowComments false;
 // $antlr-format alignColons hanging;
-NUMBER: INTEGER | FLOAT;
-MathConstant
-    : Pi
-    | E
-    | I
-    | EulerGamma
-    | Plank
-    | Reciprocal
-    | IntegerField
-    | RealField
-    | ComplexField;
-
+AssignPrefix: Let | Final;
 // $antlr-format alignColons trailing;
 
 /* Module */
@@ -41,36 +32,31 @@ Private   : 'private';
 Protected : 'protected';
 Final     : 'final';
 
+/* Function */
+Let : 'let';
+
 /* Loop */
 Try   : 'try';
 Catch : 'catch';
 For   : 'for';
 In    : 'in';
 
-/* Math */
-Pi           : '\u213C'; //U+213C ℼ
-E            : '\u2147'; //U+2147 ⅇ
-I            : '\u2148'; //U+2148 ⅈ
-EulerGamma   : '\u213D'; //U+213D ℽ
-Plank        : '\u210E'; //U+210E ℎ
-Reciprocal   : '\u215F'; //U+215F ⅟
-Derivative   : '\u2146'; //U+2146 ⅆ
-IntegerField : '\u2124'; //U+2124 ℤ
-RealField    : '\u211D'; //U+211D ℝ
-ComplexField : '\u2102'; //U+2102 ℂ 
-
-fragment Digit      : [0-9];
-fragment OctalDigit : [0-7];
-fragment HexDigit   : [0-9a-fA-F];
-fragment Letter     : [a-zA-Z];
-SYMBOL              : NameStartCharacter NameCharacter*;
-STRING              : '"' .*? '"';
-INTEGER             : Digit+;
-FLOAT               : Digit+ ('.' Digit+)?;
+fragment Digit         : [0-9];
+fragment OctalDigit    : [0-7];
+fragment HexDigit      : [0-9a-fA-F];
+fragment Letter        : [a-zA-Z];
+fragment UNICODE_WS    : [\p{White_Space}];
+fragment NameCharacter : NameStartCharacter | Digit;
+WhiteSpace             : [\t\r\n \u000C]+ -> skip;
+NewLine                : ('\r'? '\n' | '\r')+ -> skip;
+Comment                : '%%%' .*? '%%%' -> channel(HIDDEN);
+SYMBOL                 : NameStartCharacter NameCharacter*;
+SimpleString           : '"' .*? '"';
+Integer                : Digit+;
+Float                  : Digit+ ('.' Digit+)?;
+EMOJI                  : [\u{1F4A9}\u{1F926}]; // note Unicode code points > U+FFFF
+UNICODE_ID:
+    [\p{Alpha}\p{General_Category=Other_Letter}] [\p{Alnum}\p{General_Category=Other_Letter}]*;
+fragment NameStartCharacter : [:a-zA-Z] | '_';
 // $antlr-format alignColons hanging;
-
-fragment NameCharacter: NameStartCharacter | Digit;
-fragment NameStartCharacter
-    : [:a-zA-Z] // Letter
-    | '_';
 // May Allow # $ % with special meaning English + Chinese + Japanese + Greeks

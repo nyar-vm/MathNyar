@@ -21,6 +21,9 @@ public class Translator extends NyarBaseVisitor<String> {
         if (ctx.expressionStatement() != null) {
             result += this.visit(ctx.expressionStatement());
         }
+        if (ctx.assignStatement() != null) {
+            result += this.visit(ctx.assignStatement());
+        }
         return String.format("%s;", result);
     }
 
@@ -61,21 +64,16 @@ public class Translator extends NyarBaseVisitor<String> {
         }
     }
 
-    /*
-    public String visitSingleStatement(NyarParser.SingleStatementContext ctx) {
-        String expr = this.vsit(ctx.expression());
-        //System.out.printf("Set[%s,%s];\n", id, value);
-        return String.format("%s;\n", expr);
+
+
+
+    public String visitOperatorAssignExpression(NyarParser.OperatorAssignExpressionContext ctx) {
+        String id = ctx.id.getText();
+        String expr = this.visit(ctx.expression());
+        System.out.printf("Set[%s,%s];\n", id, expr);
+        return String.format("Set[%s,%s]", id, expr);
     }
 
-    // ID '=' expr
-    public String visitAssignStatement(NyarParser.AssignStatementContext ctx) {
-        String id = ctx.SYMBOL().getText();
-        String value = this.visit(ctx.expression());
-        //System.out.printf("Set[%s,%s];\n", id, value);
-        return String.format("Set[%s,%s];\n", id, value);
-    }
-    */
 
     public String visitPlus_Like(NyarParser.Plus_LikeContext ctx) {
         String lhs = this.visit(ctx.left);

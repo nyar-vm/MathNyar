@@ -8,3 +8,6 @@ Null;
 Times[Subtract[1,Plus[2,3]],Minus[4]];
 Subtract[Power[4,Power[3,2]],Surd[Surd[4,3],2]];
 Subtract[Power[4,Power[3,2]],Surd[Surd[4,3],2]];
+Set[a,2];
+Set[a,Plus[2,Times[2,Power[2,2]]]];
+Set[a,Set[b,3]];
