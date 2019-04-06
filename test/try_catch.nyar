@@ -1,0 +1,49 @@
+%%%
+%%% https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Statements/try...catch %%%
+
+
+%%% basic %%%
+try {
+	throw("myException");
+}
+catch (e) {
+	logMyErrors(e);
+}
+
+
+
+%%% adv %%%
+try {
+	myroutine();
+}
+catch (e if e instanceof TypeError) {
+	logMyErrors(e,TypeError);
+}
+catch (e if e instanceof RangeError) {
+	logMyErrors(e,RangeError);
+}
+catch (e if e instanceof EvalError) {
+	logMyErrors(e,EvalError);
+}
+catch (e) {
+	logMyErrors(e);
+}
+
+%%% adv %%%
+try {
+	myroutine();
+}
+catch (e) {
+	if (e instanceof TypeError) {
+		logMyErrors(e,TypeError);
+	}
+	else if (e instanceof RangeError) {
+		logMyErrors(e,RangeError);
+    }
+	else if (e instanceof EvalError) {
+		logMyErrors(e,EvalError);
+    }
+    else {
+		logMyErrors(e);
+    }
+}
