@@ -42,6 +42,7 @@ Remainder    : '//';
 Divide       : '/';
 //Unknow4      : '\u2298'; //U+2298 ⊘
 Quotient  : '\u00F7'; //U+00F7 ÷
+Comment   : '%%%';
 Output    : '%%';
 Mod       : '%';
 BaseInput : '^^';
@@ -69,6 +70,7 @@ MinusFrom     : '-=';
 
 //Lambda
 SlotSequence      : '##';
+Shebang           : '#!';
 Slot              : '#';
 PostfixFunction   : '$$';
 AnonymousFunction : '$';
@@ -101,6 +103,7 @@ Unknow6 : '<=>' | '\u27FA'; //U+27FA ⟺
 
 // Linear algebra LinearPlus : '|+'; LinearSubtract : '|-'; LinearTimes : '|*'; LinearDivide : '|/';
 // LinearMod : '|%'; LinearPower : '|^';
-Multiply      : '\u00D7'; // U+00D7 ×
-Kronecker     : '\u2297'; // U+2297 ⊗
-TensorProduct : '\u2299'; // U+2299 ⊙bitlikebit_opslogic_opsmul_opsadd_opslist_opspow_opsprefix_ops
+Multiply  : '\u00D7'; // U+00D7 ×
+Kronecker : '\u2297'; // U+2297 ⊗
+TensorProduct:
+    '\u2299'; // U+2299 ⊙bitlikebit_opslogic_opsmul_opsadd_opslist_opspow_opsprefix_ops

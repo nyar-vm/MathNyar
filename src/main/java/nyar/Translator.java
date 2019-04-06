@@ -155,7 +155,7 @@ public class Translator extends NyarBaseVisitor<String> {
     }
 
     public String visitIfStatement(NyarParser.IfStatementContext ctx) {
-        int else_count = ctx.elseifStatement().Else().size();
+        int else_count = ctx.elseif().Else().size();
         int then_count = 0;
         if (ctx.Else() != null) {
             then_count += 1;
@@ -179,19 +179,19 @@ public class Translator extends NyarBaseVisitor<String> {
                 } else {
                     return String.format(
                             "Nyar`Core`ElseIf[%s,%s,%s,%s]", cond, then,
-                            this.visit(ctx.elseifStatement().condition(0).expression()),
-                            this.visit(ctx.elseifStatement().condition(0).expr_block())
+                            this.visit(ctx.elseif().condition(0).expression()),
+                            this.visit(ctx.elseif().condition(0).expr_block())
                     );
                 }
             }
             default: {
                 String cond = this.visit(ctx.condition().expression());
                 String then = this.visit(ctx.condition().expr_block());
-                String expr = this.visit(ctx.expr_block());
-                String result = "Nyar`Core`ElseIf[";
+                //String expr = this.visit(ctx.expr_block());
+                String result = "Nyar`Core`ElseIf[" + cond + "," + then;
                 for (int i = 0; i < else_count; i++) {
-                    result += this.visit(ctx.elseifStatement().condition(i).expression()) + ","
-                            + this.visit(ctx.elseifStatement().condition(i).expr_block()) + ",";
+                    result += this.visit(ctx.elseif().condition(i).expression()) + ","
+                            + this.visit(ctx.elseif().condition(i).expr_block()) + ",";
                     //result += this.visit(ctx.elseifStatement().condition(i));
                 }
                 if (then_count == 1) {

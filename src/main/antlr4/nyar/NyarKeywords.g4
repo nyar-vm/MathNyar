@@ -1,10 +1,15 @@
 lexer grammar NyarKeywords;
-STRING: SimpleString;
-NUMBER: Integer | Float;
 // $antlr-format useTab false; reflowComments false;
-// $antlr-format alignColons hanging;
-AssignPrefix: Let | Final;
 // $antlr-format alignColons trailing;
+fragment Digit              : [0-9];
+fragment OctalDigit         : [0-7];
+fragment HexDigit           : [0-9a-fA-F];
+fragment Letter             : [a-zA-Z];
+fragment UNICODE_WhiteSpace : [\p{White_Space}];
+fragment SimpleString       : '"' .*? '"';
+fragment EmojiCharacter     : [\p{Emoji}];
+fragment NameStartCharacter : [:a-zA-Z] | '_';
+fragment NameCharacter      : NameStartCharacter | Digit;
 
 /* Module */
 Use    : 'use';
@@ -45,22 +50,14 @@ Catch : 'catch';
 For   : 'for';
 In    : 'in';
 
-fragment Digit         : [0-9];
-fragment OctalDigit    : [0-7];
-fragment HexDigit      : [0-9a-fA-F];
-fragment Letter        : [a-zA-Z];
-fragment UNICODE_WS    : [\p{White_Space}];
-fragment NameCharacter : NameStartCharacter | Digit;
-WhiteSpace             : [\t\r\n \u000C]+ -> skip;
-NewLine                : ('\r'? '\n' | '\r')+ -> skip;
-Comment                : '%%%' .*? '%%%' -> channel(HIDDEN);
-SYMBOL                 : NameStartCharacter NameCharacter*;
-SimpleString           : '"' .*? '"';
-Integer                : Digit+;
-Float                  : Digit+ ('.' Digit+)?;
-EMOJI                  : [\u{1F4A9}\u{1F926}]; // note Unicode code points > U+FFFF
-UNICODE_ID:
-    [\p{Alpha}\p{General_Category=Other_Letter}] [\p{Alnum}\p{General_Category=Other_Letter}]*;
-fragment NameStartCharacter : [:a-zA-Z] | '_';
+
+STRING      : SimpleString;
+NUMBER      : Integer | Float;
+SYMBOL      : NameStartCharacter NameCharacter*; //Try JS | Julia
+Integer     : Digit+;
+Float       : Digit+ '.' Digit* | '.' Digit+;
+//UNICODE_ID : [\p{General_Category=Other_Letter}]*; May Allow # $ % with special meaning English +
+// Chinese + Japanese + Greeks
+
 // $antlr-format alignColons hanging;
-// May Allow # $ % with special meaning English + Chinese + Japanese + Greeks
+AssignPrefix: Let | Final;
