@@ -12,8 +12,8 @@ public class Translator extends NyarBaseVisitor<String> {
 
     public String visitStatement(NyarParser.StatementContext ctx) {
         String result = "";
-        if (ctx.block() != null) {
-            result += this.visit(ctx.block());
+        if (ctx.blockStatement() != null) {
+            result += this.visit(ctx.blockStatement());
         }
         if (ctx.emptyStatement() != null) {
             result += this.visit(ctx.emptyStatement());
@@ -30,7 +30,7 @@ public class Translator extends NyarBaseVisitor<String> {
         return String.format("%s;", result);
     }
 
-    public String visitBlock(NyarParser.BlockContext ctx) {
+    public String visitBlockStatement(NyarParser.BlockStatementContext ctx) {
         return visitChildren(ctx);
     }
 

@@ -12,13 +12,13 @@ statement
     | ifStatement
     | tryStatement;
 /*====================================================================================================================*/
-blockStatement: '{' statement+? '}';
+blockStatement: LL statement+? RL;
 expr_block: blockStatement | expression;
 /*====================================================================================================================*/
 emptyStatement: eos;
 eos: Semicolon;
 /*====================================================================================================================*/
-expressionStatement: expression (',' expression)* eos?;
+expressionStatement: expression (Comma expression)* eos?;
 expression // High computing priority in the front
     : op = Prefix_ops expression                                        # PrefixExpression
     | left = expression op = Bit_ops right = expression                 # Binary_Like
@@ -26,33 +26,35 @@ expression // High computing priority in the front
     | <assoc = right> left = expression op = Pow_ops right = expression # Power_Like
     | left = expression op = Mul_ops right = expression                 # Multiply_Like
     | left = expression op = Add_ops right = expression                 # Plus_Like
+    | left = expression op = List_ops right = expression                # List_Like
     | <assoc = right> id = SYMBOL op = AssignPrefix expr = expression   # OperatorAssignExpression
     | atom = STRING                                                     # String
     | atom = NUMBER                                                     # Number
     | atom = SYMBOL                                                     # Symbol
-    | '(' expression ')'                                                # PriorityExpression;
+    | LS expression RS                                                  # PriorityExpression;
 /*====================================================================================================================*/
+//FIXME: a=2
 assignStatement
     : op = AssignPrefix id = SYMBOL expr = expression eos?     # ModifierAssignExpression
     | op = AssignPrefix id = SYMBOL expr = blockStatement eos? # ModifierAssignBlock;
 /*====================================================================================================================*/
 ifStatement: If condition elseif (Else expr_block)? eos?;
 elseif: (Else If condition)*;
-condition: '('? expression expr_block ')'?;
+condition: LS? expression expr_block RS?;
 /*====================================================================================================================*/
 tryStatement
     : Try blockStatement finalProduction
     | Try blockStatement (catchProduction finalProduction?);
 //TODO: USE expr_block
-catchProduction: Catch '('? SYMBOL ')'? blockStatement;
+catchProduction: Catch LS? SYMBOL RS? blockStatement;
 finalProduction: Final blockStatement;
 /*====================================================================================================================*/
-// $antlr-format alignColons trailing;
-dataLiteral : array | object;
-object      : '{' (keyvalue (',' keyvalue)*)? '}'; //FIXME: {a:1}
-keyvalue    : (STRING | SYMBOL | Integer) ':' expression;
-array       : '[' elementList? ','* ']'; //FIXME: [a+1]
-elementList : expression (','+ expression)*;
+// $antlr-format alignColons trailing; 
+dataLiteral : array | object; //FIXME: {a:1}
+object      : LL (keyvalue (Comma keyvalue)*)? Comma? RL;
+keyvalue    : (STRING | SYMBOL | Integer) Colon element;
+array       : LM (element (Comma? element)*)+? Comma* RM;
+element     : (expression | array);
 /*====================================================================================================================*/
 LineComment : Shebang ~[\r\n]* -> channel(HIDDEN);
 PartComment : Comment .*? Comment -> channel(HIDDEN);

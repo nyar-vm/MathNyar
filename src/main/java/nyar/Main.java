@@ -11,7 +11,7 @@ import org.antlr.v4.runtime.CommonTokenStream;
 public class Main {
     public static void main(String[] args) throws Exception {
 
-        String Test = "condition";
+        String Test = "basic";
         CharStream input = CharStreams.fromFileName("test/" + Test + ".nyar");
         File output = new File("test/" + Test + ".m");
 
