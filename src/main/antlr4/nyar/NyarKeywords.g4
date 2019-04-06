@@ -38,7 +38,9 @@ Protected : 'protected';
 Final     : 'final';
 
 /* Function */
-Let : 'let';
+Let   : 'let';
+True  : 'true';
+False : 'false';
 
 /* Condition */
 If   : 'if';
@@ -50,12 +52,12 @@ Catch : 'catch';
 For   : 'for';
 In    : 'in';
 
-
-STRING      : SimpleString;
-NUMBER      : Integer | Float;
-SYMBOL      : NameStartCharacter NameCharacter*; //Try JS | Julia
-Integer     : Digit+;
-Float       : Digit+ '.' Digit* | '.' Digit+;
+BOOL    : True | False;
+STRING  : SimpleString;
+NUMBER  : Integer | Float;
+SYMBOL  : NameStartCharacter NameCharacter*; //Try JS | Julia
+Integer : Digit+;
+Float   : Digit+ '.' Digit* | '.' Digit+;
 //UNICODE_ID : [\p{General_Category=Other_Letter}]*; May Allow # $ % with special meaning English +
 // Chinese + Japanese + Greeks
 

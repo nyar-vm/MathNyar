@@ -3,17 +3,17 @@ import NyarOperators, NyarKeywords;
 // $antlr-format useTab false ;reflowComments false; columnLimit 9999;
 // $antlr-format alignColons hanging;
 program: statement* EOF;
-//elementList: elision? expression ( ',' elision? expression)*;
 statement
-    : block
-    | emptyStatement
+    : emptyStatement
+    | dataLiteral
+    | blockStatement
     | expressionStatement
     | assignStatement
     | ifStatement
     | tryStatement;
 /*====================================================================================================================*/
-block: '{' statement+? '}';
-expr_block: block | expression;
+blockStatement: '{' statement+? '}';
+expr_block: blockStatement | expression;
 /*====================================================================================================================*/
 emptyStatement: eos;
 eos: Semicolon;
@@ -25,8 +25,7 @@ expression // High computing priority in the front
     | left = expression op = Logic_ops right = expression               # Logic_Like
     | <assoc = right> left = expression op = Pow_ops right = expression # Power_Like
     | left = expression op = Mul_ops right = expression                 # Multiply_Like
-    | left = expression op = add_ops right = expression                 # Plus_Like
-    | left = expression op = List_ops right = expression                # List_Like
+    | left = expression op = Add_ops right = expression                 # Plus_Like
     | <assoc = right> id = SYMBOL op = AssignPrefix expr = expression   # OperatorAssignExpression
     | atom = STRING                                                     # String
     | atom = NUMBER                                                     # Number
@@ -34,23 +33,26 @@ expression // High computing priority in the front
     | '(' expression ')'                                                # PriorityExpression;
 /*====================================================================================================================*/
 assignStatement
-    : op = AssignPrefix id = SYMBOL expr = expression eos? # ModifierAssignExpression
-    | op = AssignPrefix id = SYMBOL expr = block eos?      # ModifierAssignBlock;
+    : op = AssignPrefix id = SYMBOL expr = expression eos?     # ModifierAssignExpression
+    | op = AssignPrefix id = SYMBOL expr = blockStatement eos? # ModifierAssignBlock;
 /*====================================================================================================================*/
 ifStatement: If condition elseif (Else expr_block)? eos?;
 elseif: (Else If condition)*;
 condition: '('? expression expr_block ')'?;
 /*====================================================================================================================*/
 tryStatement
-    : Try block finalProduction
-    | Try block ( catchProduction finalProduction?);
+    : Try blockStatement finalProduction
+    | Try blockStatement (catchProduction finalProduction?);
 //TODO: USE expr_block
-catchProduction: Catch '('? SYMBOL ')'? block;
-finalProduction: Final block;
-// literalSatement: arrayLiteral; arrayLiteral: '[' elementList? ','? elision? ']'; elision: ','+;
+catchProduction: Catch '('? SYMBOL ')'? blockStatement;
+finalProduction: Final blockStatement;
+/*====================================================================================================================*/
 // $antlr-format alignColons trailing;
-//list : LM (expression Comma?)* RM; record : LL (keyValue Comma?)* RL; keyValue : key = SYMBOL
-// Colon value = expression; mathAlias : alias = MathConstant
+dataLiteral : array | object;
+object      : '{' (keyvalue (',' keyvalue)*)? '}'; //FIXME: {a:1}
+keyvalue    : (STRING | SYMBOL | Integer) ':' expression;
+array       : '[' elementList? ','* ']'; //FIXME: [a+1]
+elementList : expression (','+ expression)*;
 /*====================================================================================================================*/
 LineComment : Shebang ~[\r\n]* -> channel(HIDDEN);
 PartComment : Comment .*? Comment -> channel(HIDDEN);

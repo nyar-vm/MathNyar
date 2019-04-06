@@ -10,9 +10,9 @@ Nyar`Core`If[cond_, then_, else_ : Null] := If[
 	then,
 	else,
 	Message[Nyar`Core`If::cond, Defer@cond];
-]
+];
 
 Nyar`Core`ElseIf::usage = "";
 Nyar`Core`ElseIf ~ SetAttributes ~ HoldAll;
 Nyar`Core`ElseIf[expr_] := Hold@expr;
-Nyar`Core`ElseIf[cond_, then_, exprs___] := ReleaseHold@Nyar`Core`If[cond, Hold@then, Nyar`Core`ElseIf@exprs]
+Nyar`Core`ElseIf[cond_, then_, exprs___] := ReleaseHold@Nyar`Core`If[cond, Hold@then, Nyar`Core`ElseIf@exprs];

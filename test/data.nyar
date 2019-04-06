@@ -1,0 +1,4 @@
+%%% 空表 %%%
+[]         #! Tuple
+()         #! List
+{}         #! HashMap

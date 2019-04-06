@@ -1,5 +1,38 @@
 lexer grammar NyarOperators;
 // $antlr-format useTab false ;reflowComments false;
+// $antlr-format alignColons hanging;
+Prefix_ops: Plus | Minus | Bang;
+Bit_ops: LeftShift | RightShift;
+Logic_ops
+    : Equal
+    | NotEqual
+    | Equivalent
+    | NotEquivalent
+    | Grater
+    | GraterEqual
+    | Less
+    | LessEqual;
+Pow_ops: Power | Surd;
+Mul_ops: Divide | Times | Multiply | Kronecker | TensorProduct;
+Add_ops: Plus | Minus;
+List_ops: Concat;
+Assign_ops
+    : Assign
+    | PlusTo
+    | MinusFrom
+    | LetAssign
+    | FinalAssign;
+Lazy_assign: DelayedAssign;
+MathConstant
+    : Pi
+    | E
+    | I
+    | EulerGamma
+    | Plank
+    | Reciprocal
+    | IntegerField
+    | RealField
+    | ComplexField;
 // $antlr-format alignColons trailing;
 // Brackets Pair
 LS     : '(';
@@ -47,7 +80,7 @@ Output    : '%%';
 Mod       : '%';
 BaseInput : '^^';
 Power     : '^';
-Root      : '\u221A'; //U+221A √
+Surd      : '\u221A'; //U+221A √
 
 //Logic Operators
 Equivalent    : '===';
@@ -86,6 +119,7 @@ Semicolon : ';';
 // Single Operators
 Quote     : '`';
 Bang      : '!';
+Ellipsis  : '...';
 Dot       : '.';
 Comma     : ',';
 Quotation : '\'';
@@ -95,15 +129,26 @@ Map    : '/@';
 MapAll : '//@';
 
 // Arrow Symbol
-To      : '->' | '\u2192'; //U+2192 →
-Infer   : '=>' | '\u27F9'; //U+27F9 ⟹
-Concat  : '<>';
+To    : '->' | '\u2192'; //U+2192 →
+Infer : '=>' | '\u27F9'; //U+27F9 ⟹
+Concat  : '~~';
 Unknow5 : '<->';
 Unknow6 : '<=>' | '\u27FA'; //U+27FA ⟺
 
 // Linear algebra LinearPlus : '|+'; LinearSubtract : '|-'; LinearTimes : '|*'; LinearDivide : '|/';
 // LinearMod : '|%'; LinearPower : '|^';
-Multiply  : '\u00D7'; // U+00D7 ×
-Kronecker : '\u2297'; // U+2297 ⊗
-TensorProduct:
-    '\u2299'; // U+2299 ⊙bitlikebit_opslogic_opsmul_opsadd_opslist_opspow_opsprefix_ops
+Multiply      : '\u00D7'; // U+00D7 ×
+Kronecker     : '\u2297'; // U+2297 ⊗
+TensorProduct : '\u2299'; // U+2299 ⊙
+
+/* Math Constant */
+Pi           : '\u213C'; //U+213C ℼ
+E            : '\u2147'; //U+2147 ⅇ
+I            : '\u2148'; //U+2148 ⅈ
+EulerGamma   : '\u213D'; //U+213D ℽ
+Plank        : '\u210E'; //U+210E ℎ
+Reciprocal   : '\u215F'; //U+215F ⅟
+Derivative   : '\u2146'; //U+2146 ⅆ
+IntegerField : '\u2124'; //U+2124 ℤ
+RealField    : '\u211D'; //U+211D ℝ
+ComplexField : '\u2102'; //U+2102 ℂ
