@@ -8,7 +8,7 @@ fragment Letter             : [a-zA-Z];
 fragment UNICODE_WhiteSpace : [\p{White_Space}];
 fragment SimpleString       : '"' .*? '"';
 fragment EmojiCharacter     : [\p{Emoji}];
-fragment NameStartCharacter : [:a-zA-Z] | '_';
+fragment NameStartCharacter : Letter | '_';
 fragment NameCharacter      : NameStartCharacter | Digit;
 
 /* Module */
@@ -52,10 +52,6 @@ Catch : 'catch';
 For   : 'for';
 In    : 'in';
 
-BOOL    : True | False;
-STRING  : SimpleString;
-NUMBER  : Integer | Float;
-SYMBOL  : NameStartCharacter NameCharacter*; //Try JS | Julia
 Integer : Digit+;
 Float   : Digit+ '.' Digit* | '.' Digit+;
 //UNICODE_ID : [\p{General_Category=Other_Letter}]*; May Allow # $ % with special meaning English +

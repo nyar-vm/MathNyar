@@ -49,14 +49,19 @@ tryStatement
 catchProduction: Catch LS? SYMBOL RS? blockStatement;
 finalProduction: Final blockStatement;
 /*====================================================================================================================*/
-// $antlr-format alignColons trailing; 
-dataLiteral : array | object; //FIXME: {a:1}
-object      : LL (keyvalue (Comma keyvalue)*)? Comma? RL;
-keyvalue    : (STRING | SYMBOL | Integer) Colon element;
-array       : LM (element (Comma? element)*)+? Comma* RM;
-element     : (expression | array);
+// $antlr-format alignColons trailing;
+//FIXME:keyvalue:(STRING|SYMBOL|Integer) Colon element;
+dataLiteral : (list | dict);
+dict        : LL (keyvalue (Comma keyvalue)*)? Comma? RL;
+keyvalue    : (STRING | SYMBOL | NUMBER) Colon element;
+list        : LM (element (Comma? element)*)? Comma? RM;
+element     : (expression | list | dict);
 /*====================================================================================================================*/
 LineComment : Shebang ~[\r\n]* -> channel(HIDDEN);
 PartComment : Comment .*? Comment -> channel(HIDDEN);
 WhiteSpace  : [\t\r\n \u000C]+ -> skip;
 NewLine     : ('\r'? '\n' | '\r')+ -> skip;
+SYMBOL      : NameStartCharacter NameCharacter*; //Try JS | Julia
+NUMBER      : (Integer | Float);
+BOOL        : (True | False);
+STRING      : SimpleString;
