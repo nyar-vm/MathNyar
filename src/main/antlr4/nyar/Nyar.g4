@@ -17,6 +17,12 @@ expr_block: blockStatement | expression;
 /*====================================================================================================================*/
 emptyStatement: eos;
 eos: Semicolon;
+dataLiteral
+    : data = listLiteral # List
+    | data = dictLiteral # Dict
+    | atom = STRING      # String
+    | atom = NUMBER      # Number
+    | atom = SYMBOL      # Symbol;
 /*====================================================================================================================*/
 expressionStatement: expression (Comma expression)* eos?;
 expression // High computing priority in the front
@@ -27,13 +33,11 @@ expression // High computing priority in the front
     | left = expression op = Mul_ops right = expression                 # Multiply_Like
     | left = expression op = Add_ops right = expression                 # Plus_Like
     | left = expression op = List_ops right = expression                # List_Like
-    | <assoc = right> id = SYMBOL op = AssignPrefix expr = expression   # OperatorAssignExpression
-    | atom = STRING                                                     # String
-    | atom = NUMBER                                                     # Number
-    | atom = SYMBOL                                                     # Symbol
+    | <assoc = right> id = SYMBOL op = Assign_ops expr = expression     # OperatorAssignExpression
+    | dataLiteral                                                       # Data
     | LS expression RS                                                  # PriorityExpression;
 /*====================================================================================================================*/
-//FIXME: a=2
+AssignPrefix: Let | Final;
 assignStatement
     : op = AssignPrefix id = SYMBOL expr = expression eos?     # ModifierAssignExpression
     | op = AssignPrefix id = SYMBOL expr = blockStatement eos? # ModifierAssignBlock;
@@ -42,20 +46,18 @@ ifStatement: If condition elseif (Else expr_block)? eos?;
 elseif: (Else If condition)*;
 condition: LS? expression expr_block RS?;
 /*====================================================================================================================*/
-tryStatement
+tryStatement //TODO: USE expr_block
     : Try blockStatement finalProduction
     | Try blockStatement (catchProduction finalProduction?);
-//TODO: USE expr_block
 catchProduction: Catch LS? SYMBOL RS? blockStatement;
 finalProduction: Final blockStatement;
 /*====================================================================================================================*/
 // $antlr-format alignColons trailing;
-//FIXME:keyvalue:(STRING|SYMBOL|Integer) Colon element;
-dataLiteral : (list | dict);
-dict        : LL (keyvalue (Comma keyvalue)*)? Comma? RL;
+dictLiteral : LL (keyvalue (Comma keyvalue)*)? Comma? RL;
 keyvalue    : (STRING | SYMBOL | NUMBER) Colon element;
-list        : LM (element (Comma? element)*)? Comma? RM;
-element     : (expression | list | dict);
+listLiteral : LM (element (Comma? element)*)? Comma? RM;
+element     : (expression | dictLiteral | listLiteral);
+//FIXME:keyvalue:(STRING|SYMBOL|Integer) Colon element;
 /*====================================================================================================================*/
 LineComment : Shebang ~[\r\n]* -> channel(HIDDEN);
 PartComment : Comment .*? Comment -> channel(HIDDEN);

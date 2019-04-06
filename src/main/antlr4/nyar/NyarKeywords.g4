@@ -58,4 +58,3 @@ Float   : Digit+ '.' Digit* | '.' Digit+;
 // Chinese + Japanese + Greeks
 
 // $antlr-format alignColons hanging;
-AssignPrefix: Let | Final;
