@@ -112,6 +112,8 @@ Quotation         : '\'';
 Map               : '/@';
 MapAll            : '//@';
 Concat            : '~~';
+Destruct          : '~=';
+Tilde             : '~';
 Multiply          : '\u00D7'; // U+00D7 ×
 Kronecker         : '\u2297'; // U+2297 ⊗
 TensorProduct     : '\u2299'; // U+2299 ⊙

@@ -1,6 +1,6 @@
 grammar Nyar;
 import NyarOperators, NyarKeywords;
-// $antlr-format useTab false ;reflowComments false; columnLimit 9999;
+// $antlr-format useTab false ;reflowComments false; 
 // $antlr-format alignColons hanging;
 program: statement* EOF;
 statement
@@ -26,21 +26,24 @@ dataLiteral
 /*====================================================================================================================*/
 expressionStatement: expression (Comma expression)* eos?;
 expression // High computing priority in the front
-    : op = Prefix_ops expression                                        # PrefixExpression
-    | left = expression op = Bit_ops right = expression                 # Binary_Like
-    | left = expression op = Logic_ops right = expression               # Logic_Like
-    | <assoc = right> left = expression op = Pow_ops right = expression # Power_Like
-    | left = expression op = Mul_ops right = expression                 # Multiply_Like
-    | left = expression op = Add_ops right = expression                 # Plus_Like
-    | left = expression op = List_ops right = expression                # List_Like
-    | <assoc = right> id = SYMBOL op = Assign_ops expr = expression     # OperatorAssignExpression
-    | dataLiteral                                                       # Data
-    | LS expression RS                                                  # PriorityExpression;
+    : op = Prefix_ops expression                                         # PrefixExpression
+    | left = expression op = Bit_ops right = expression                  # Binary_Like
+    | left = expression op = Logic_ops right = expression                # Logic_Like
+    | <assoc = right> left = expression op = Pow_ops right = expression  # Power_Like
+    | left = expression op = Mul_ops right = expression                  # Multiply_Like
+    | left = expression op = Add_ops right = expression                  # Plus_Like
+    | left = expression op = List_ops right = expression                 # List_Like
+    | <assoc = right> id = assignTuple op = Assign_ops expr = assignable # OperatorAssign
+    | dataLiteral                                                        # Data
+    | LS expression RS                                                   # PriorityExpression;
 /*====================================================================================================================*/
-AssignPrefix: Let | Final;
+Assign_mods: Let | Final;
+assignable: (expression | blockStatement);
 assignStatement
-    : op = AssignPrefix id = SYMBOL expr = expression eos?     # ModifierAssignExpression
-    | op = AssignPrefix id = SYMBOL expr = blockStatement eos? # ModifierAssignBlock;
+    : op = Assign_mods id = assignTuple expr = assignable eos? # ModifierAssign;
+assignTuple
+    : (SYMBOL | LS (assignPass (Comma assignPass)*)? Comma? RS);
+assignPass: Tilde | SYMBOL;
 /*====================================================================================================================*/
 ifStatement: If condition elseif (Else expr_block)? eos?;
 elseif: (Else If condition)*;
@@ -53,10 +56,12 @@ catchProduction: Catch LS? SYMBOL RS? blockStatement;
 finalProduction: Final blockStatement;
 /*====================================================================================================================*/
 // $antlr-format alignColons trailing;
-dictLiteral : LL (keyvalue (Comma keyvalue)*)? Comma? RL;
-keyvalue    : (STRING | SYMBOL | NUMBER) Colon element;
-listLiteral : LM (element (Comma? element)*)? Comma? RM;
-element     : (expression | dictLiteral | listLiteral);
+tupleLiteral : LS (single (Comma single)*)? Comma? RS;
+single       : (STRING | SYMBOL | NUMBER);
+dictLiteral  : LL (keyvalue (Comma keyvalue)*)? Comma? RL;
+keyvalue     : (STRING | SYMBOL | NUMBER) Colon element;
+listLiteral  : LM (element (Comma? element)*)? Comma? RM;
+element      : (expression | dictLiteral | listLiteral);
 //FIXME:keyvalue:(STRING|SYMBOL|Integer) Colon element;
 /*====================================================================================================================*/
 LineComment : Shebang ~[\r\n]* -> channel(HIDDEN);
