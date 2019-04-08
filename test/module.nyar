@@ -1,0 +1,63 @@
+#! lang = toy-nyar
+%%% 
+## 模块导入机制
+
+
+
+
+%%%
+
+#!- 导入模块 
+using MachineLearning;
+using Feature.Nobrackets;
+
+#!- 模块别称
+using MachineLearning as ML;
+
+#!- 全部导入
+using MachineLearning *;
+
+#!- 原始导入
+using MachineLearning ^;
+
+#!- 导入函数
+using MachineLearning {Chain,Graph};
+using MachineLearning {Chain,Graph}
+
+#!- 符号别称
+using MachineLearning {
+    SequencePredict as Predict,
+    PredictorMeasurements as Measurements
+};
+
+%%%
+## 文件路径解析机制
+
+
+
+
+%%%
+
+#!- 相对路径
+using "./basic";
+using "./basic.nyar";
+using "../test/basic.nyar";
+
+#!- 绝对路径
+using "~/bin/cat.nyar";
+using "file://user/bin/cat.nyar";
+
+#!- 网络路径
+using "https://raw.githubusercontent.com/GalAster/Nyar-WRT/master/test/basic.nyar";
+using "https://m.vers.site/settings.json" as settings;
+#! 等价于 `settings = import("https://m.vers.site/settings.json")`, 会自动调用默认的 `json` 解析方法.
+
+#!- 导出模块
+expose class Test { }
+addInteger(a::Integer,b::Integer) := a + b;
+Fadd(a::Float,b::Float) := a + b;
+expose addInteger;
+expose {
+    Fadd as addFloat
+}
+
