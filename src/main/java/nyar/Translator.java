@@ -5,7 +5,7 @@ public class Translator extends NyarBaseVisitor<String> {
         StringBuilder result = new StringBuilder();
         for (int i = 1; i < ctx.getChildCount(); i++) {
             //System.out.print("Statement: " + ctx.statement(i-1).getText() + "\n");
-            result.append(this.visit(ctx.statement(i - 1)));
+            result.append(this.visit(ctx.statement(i - 1))).append('\n');
         }
         return result.toString();
     }
@@ -23,9 +23,10 @@ public class Translator extends NyarBaseVisitor<String> {
     */
     public String visitEmptyStatement(NyarParser.EmptyStatementContext ctx) {
         //System.out.print("EmptyStatement!!\n");
-        return "Null";
+        return "Null;";
     }
-    /*
+
+
     public String visitExpressionStatement(NyarParser.ExpressionStatementContext ctx) {
         StringBuilder result = new StringBuilder();
         for (int i = 1; i < ctx.getChildCount(); i++) {
@@ -38,16 +39,18 @@ public class Translator extends NyarBaseVisitor<String> {
             return result.toString();
         }
     }
-    */
+
+
     public String visitPriorityExpression(NyarParser.PriorityExpressionContext ctx) {
         String expression = this.visit(ctx.expression());
         //System.out.print("Priority: " + ctx.expression().getText() + "\n");
         return String.format("%s", expression);
     }
 
+
     public String visitPrefixExpression(NyarParser.PrefixExpressionContext ctx) {
         String rhs = this.visit(ctx.right);
-        //System.out.printf("Operator: %s (%s);\n", ctx.op.getText(), expr);
+        //System.out.printf("Operator: %s (%s);\n", ctx.op.getText(), rhs);
         switch (ctx.op.getText()) {
             case "+":
                 return String.format("Plus[%s]", rhs);
