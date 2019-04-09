@@ -4,29 +4,29 @@ import NyarKeywords, NyarOperators;
 // $antlr-format alignColons hanging;
 program: statement* EOF;
 statement
-    : emptyStatement
-    | blockStatement
-    | expressionStatement
-    | assignStatement
-    | ifStatement
-    | tryStatement
-    | moduleStatement;
+    : empty_statement      # EmptyStatement
+    | block_statement      # BlockStatement
+    | expression_statement # ExpressionStatement
+    | assign_statement     # AssignStatement
+    | if_statement         # IfStatement
+    | try_statement        # TryStatement
+    | module_statement     # ModuleStatement;
 /*====================================================================================================================*/
-blockStatement: LL statement+? RL;
-expr_block: blockStatement | expression;
+block_statement: LL statement+? RL;
+expr_block: block_statement | expression;
 /*====================================================================================================================*/
-emptyStatement: eos;
+empty_statement: eos;
 eos: Semicolon;
 /*====================================================================================================================*/
-expressionStatement: expression (Comma expression)* eos?;
+expression_statement: expression (Comma expression)* eos?;
 expression // High computing priority in the front
-    : op = Pre_ops right = expression                                    # PrefixExpression
-    | left = expression op = Bit_ops right = expression                  # Binary_Like
-    | left = expression op = Logic_ops right = expression                # Logic_Like
-    | <assoc = right> left = expression op = Pow_ops right = expression  # Power_Like
-    | left = expression op = Mul_ops right = expression                  # Multiply_Like
-    | left = expression op = Add_ops right = expression                  # Plus_Like
-    | left = expression op = List_ops right = expression                 # List_Like
+    : op = pre_ops right = expression                                    # PrefixExpression
+    | left = expression op = bit_ops right = expression                  # BinaryLike
+    | left = expression op = logic_ops right = expression                # LogicLike
+    | <assoc = right> left = expression op = pow_ops right = expression  # PowerLike
+    | left = expression op = mul_ops right = expression                  # MultiplyLike
+    | left = expression op = add_ops right = expression                  # PlusLike
+    | left = expression op = Llist_ops right = expression                # ListLike
     | <assoc = right> id = assignTuple op = Assign_ops expr = assignable # OperatorAssign
     | data = tupleLiteral                                                # Tuple
     | data = listLiteral                                                 # List
@@ -35,6 +35,21 @@ expression // High computing priority in the front
     | atom = NUMBER                                                      # Number
     | atom = SYMBOL                                                      # Symbol
     | LS expression RS                                                   # PriorityExpression;
+add_ops: Plus | Minus;
+pre_ops: Plus | Minus | Not;
+bit_ops: LeftShift | RightShift;
+logic_ops
+    : Equal
+    | NotEqual
+    | Equivalent
+    | NotEquivalent
+    | Grater
+    | GraterEqual
+    | Less
+    | LessEqual;
+pow_ops: Power | Surd;
+mul_ops: Divide | Times | Multiply | Kronecker | TensorProduct;
+Llist_ops: Concat;
 /*====================================================================================================================*/
 Assign_ops
     : Assign
@@ -44,18 +59,18 @@ Assign_ops
     | FinalAssign;
 Lazy_assign: DelayedAssign;
 Assign_mods: Let | Final;
-assignable: (expression | blockStatement);
-assignStatement
+assignable: (expression | block_statement);
+assign_statement
     : op = Assign_mods id = assignTuple expr = assignable eos? # ModifierAssign;
 assignTuple
     : (SYMBOL | LS (assignPass (Comma assignPass)*)? Comma? RS);
 assignPass: Tilde | SYMBOL;
 /*====================================================================================================================*/
-moduleStatement
+module_statement
     : Using module = vaildModule
     | Using module = vaildModule As alias = SYMBOL
     | Using source = vaildModule With name = SYMBOL
-    | Using module = vaildModule LL expressionStatement+? RL;
+    | Using module = vaildModule LL expression_statement+? RL;
 vaildModule: SYMBOL (Dot SYMBOL)*?;
 controlModule: Times | Power;
 /*====================================================================================================================*/
@@ -64,15 +79,15 @@ templateStatement: Template expression eos;
 interfaceStatement: Interface expression eos;
 classStatement: Class expression eos;
 /*====================================================================================================================*/
-ifStatement: If condition elseif (Else expr_block)? eos?;
+if_statement: If condition elseif (Else expr_block)? eos?;
 condition: LS? expression expr_block RS?;
 elseif: (Else If condition)*;
 /*====================================================================================================================*/
-tryStatement //TODO: USE expr_block
-    : Try blockStatement finalProduction
-    | Try blockStatement (catchProduction finalProduction?);
-catchProduction: Catch LS? SYMBOL RS? blockStatement;
-finalProduction: Final blockStatement;
+try_statement //TODO: USE expr_block
+    : Try block_statement finalProduction
+    | Try block_statement (catchProduction finalProduction?);
+catchProduction: Catch LS? SYMBOL RS? block_statement;
+finalProduction: Final block_statement;
 /*====================================================================================================================*/
 // $antlr-format alignColons trailing;
 tupleLiteral  : LS (single (Comma single)*)? Comma? RS;
