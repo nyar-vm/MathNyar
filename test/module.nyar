@@ -1,15 +1,14 @@
 #! lang = toy-nyar
 %%% 
 ## 模块导入机制
-
-
+模块的具体行为由包管理器决定, 但是大致解析顺序是类似的.
 
 
 %%%
 
 #!- 导入模块 
 using MachineLearning;
-using Feature.Nobrackets;
+using Feature.NoBrackets;
 
 #!- 模块别称
 using MachineLearning as ML;
@@ -22,17 +21,36 @@ using MachineLearning ^;
 
 #!- 导入函数
 using MachineLearning {Chain,Graph};
-using MachineLearning {Chain,Graph}
 
 #!- 符号别称
 using MachineLearning {
     SequencePredict as Predict,
-    PredictorMeasurements as Measurements
+    PredictorMeasurements as Measurements,
 };
 
+#!- 简写形式
+using {
+    MachineLearning *,
+    Math.Advance {
+        HypergeometricPFQ as PFQ
+    }
+}
 %%%
 ## 文件路径解析机制
 
+当被引号包裹时, 
+模块将在 resolve.modules 中指定的所有目录内搜索。 你可以替换初始模块路径，此替换路径通过使用 resolve.alias 配置选项来创建一个别名。
+
+一旦根据上述规则解析路径后，解析器(resolver)将检查路径是否指向文件或目录。如果路径指向一个文件：
+
+如果路径具有文件扩展名，则被直接将文件打包。
+否则，将使用 [resolve.extensions] 选项作为文件扩展名来解析，此选项告诉解析器在解析中能够接受哪些扩展名（例如 .js, .jsx）。
+如果路径指向一个文件夹，则采取以下步骤找到具有正确扩展名的正确文件：
+
+如果文件夹中包含 package.json 文件，则按照顺序查找 resolve.mainFields 配置选项中指定的字段。并且 package.json 中的第一个这样的字段确定文件路径。
+如果 package.json 文件不存在或者 package.json 文件中的 main 字段没有返回一个有效路径，则按照顺序查找 resolve.mainFiles 配置选项中指定的文件名，看是否能在 import/require 目录下匹配到一个存在的文件名。
+文件扩展名通过 resolve.extensions 选项采用类似的方法进行解析。
+webpack 根据构建目标(build target)为这些选项提供了合理的默认配置。
 
 
 
@@ -51,6 +69,8 @@ using "file://user/bin/cat.nyar";
 using "https://raw.githubusercontent.com/GalAster/Nyar-WRT/master/test/basic.nyar";
 using "https://m.vers.site/settings.json" as settings;
 #! 等价于 `settings = import("https://m.vers.site/settings.json")`, 会自动调用默认的 `json` 解析方法.
+#! `using` 的文件会被下载到项目依赖中缓存, 并按项目设定拉取更新.
+#! 而 `import` 的文件每次运行都会重新试图下载, 就算开启缓存也只会下载到临时目录.
 
 #!- 导出模块
 expose class Test { }
