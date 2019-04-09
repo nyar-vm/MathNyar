@@ -26,8 +26,8 @@ expression // High computing priority in the front
     | <assoc = right> left = expression op = pow_ops right = expression  # PowerLike
     | left = expression op = mul_ops right = expression                  # MultiplyLike
     | left = expression op = add_ops right = expression                  # PlusLike
-    | left = expression op = Llist_ops right = expression                # ListLike
-    | <assoc = right> id = assignTuple op = Assign_ops expr = assignable # OperatorAssign
+    | left = expression op = list_ops right = expression                 # ListLike
+    | <assoc = right> id = assignTuple op = assign_ops expr = assignable # OperatorAssign
     | data = tupleLiteral                                                # Tuple
     | data = listLiteral                                                 # List
     | data = dictLiteral                                                 # Dict
@@ -49,15 +49,15 @@ logic_ops
     | LessEqual;
 pow_ops: Power | Surd;
 mul_ops: Divide | Times | Multiply | Kronecker | TensorProduct;
-Llist_ops: Concat;
+list_ops: Concat;
 /*====================================================================================================================*/
-Assign_ops
+assign_ops
     : Assign
     | PlusTo
     | MinusFrom
     | LetAssign
     | FinalAssign;
-Lazy_assign: DelayedAssign;
+lazy_assign: DelayedAssign;
 Assign_mods: Let | Final;
 assignable: (expression | block_statement);
 assign_statement
