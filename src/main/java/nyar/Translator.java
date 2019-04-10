@@ -23,9 +23,7 @@ public class Translator extends NyarBaseVisitor<String> {
     public String visitBlockStatement(NyarParser.BlockStatementContext ctx) {
         String result = "";
         //System.out.print("Block: " + ctx.getText() + "\n");
-        //TODO: FIX null
         for (int i = 0; i < ctx.statement().size(); i++) {
-            //FIXME: NORETURN
             result += this.visitStatement(ctx.statement(i));
         }
         return result;
@@ -40,9 +38,9 @@ public class Translator extends NyarBaseVisitor<String> {
 
     public String visitExpressionStatement(NyarParser.ExpressionStatementContext ctx) {
         StringBuilder result = new StringBuilder();
-        for (int i = 1; i < ctx.getChildCount(); i++) {
-            System.out.print("Expression: " + ctx.expression(i - 1).getText() + "\n");
-            result.append(this.visit(ctx.expression(i - 1)));
+        for (int i = 0; i < ctx.expression().size(); i++) {
+            //System.out.print("Expression: " + ctx.expression(i).getText() + "\n");
+            result.append(this.visit(ctx.expression(i)));
         }
         return result.toString();
     }
