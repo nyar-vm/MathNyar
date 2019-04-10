@@ -53,7 +53,6 @@ Infer           : '=>' | '\u27F9'; //U+27F9 ⟹
 Assign          : '=';
 Bar2            : '||' | '\u2016'; //U+2016 ‖
 Bar             : '|'; // ∧(2227) & && ∨(2228) ∩(2229) ∪(222A)
-DelayedAssign   : ':=' | '\u2254'; //U+2254 ≔
 Shebang         : '#!';
 PostfixFunction : '$';
 Curry           : '@@@';
@@ -61,6 +60,7 @@ Apply           : '@@';
 LetAssign       : '@=';
 At              : '@';
 TypeAnnotation  : '::' | '\u2237'; //U+2237 ∷
+DelayedAssign   : ':=' | '\u2254'; //U+2254 ≔
 Colon           : ':';
 Semicolon       : ';';
 Quote           : '`';

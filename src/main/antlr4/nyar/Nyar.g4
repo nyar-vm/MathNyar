@@ -13,30 +13,37 @@ statement
     | module_statement     # ModuleStatement;
 /*====================================================================================================================*/
 block_statement: LL statement+? RL; //@Inline
-expr_block: block_statement | expression;
+expr_block: block_statement | expression; //@Inline
 /*====================================================================================================================*/
 empty_statement: eos; //@Inline
 eos: Semicolon;
 /*====================================================================================================================*/
 expression_statement
     : expression (Comma expression)* eos?; //@Inline
+type_statement
+    : left = SYMBOL op = TypeAnnotation right = expression; //@Inline
+function_apply: SYMBOL LS function_params? RS; //@Inline
+function_params: expression (Comma expression)*;
 // High computing priority in the front
 expression
-    : op = pre_ops right = expression                                    # PrefixExpression
-    | left = expression op = bit_ops right = expression                  # BinaryLike
-    | left = expression op = logic_ops right = expression                # LogicLike
-    | <assoc = right> left = expression op = pow_ops right = expression  # PowerLike
-    | left = expression op = mul_ops right = expression                  # MultiplyLike
-    | left = expression op = add_ops right = expression                  # PlusLike
-    | left = expression op = list_ops right = expression                 # ListLike
-    | <assoc = right> id = assignTuple op = assign_ops expr = assignable # OperatorAssign
-    | data = tupleLiteral                                                # Tuple
-    | data = listLiteral                                                 # List
-    | data = dictLiteral                                                 # Dict
-    | atom = STRING                                                      # String
-    | atom = NUMBER                                                      # Number
-    | atom = SYMBOL                                                      # Symbol
-    | LS expression RS                                                   # PriorityExpression;
+    : type_statement                                                    # TypeStatement
+    | function_apply                                                    # FunctionApply
+    | op = pre_ops right = expression                                   # PrefixExpression
+    | left = expression op = bit_ops right = expression                 # BinaryLike
+    | left = expression op = logic_ops right = expression               # LogicLike
+    | <assoc = right> left = expression op = pow_ops right = expression # PowerLike
+    | left = expression op = mul_ops right = expression                 # MultiplyLike
+    | left = expression op = add_ops right = expression                 # PlusLike
+    | left = expression op = list_ops right = expression                # ListLike
+    | id = function_apply op = lazy_assign expr = assignable            # LazyAssign
+    | <assoc = right> id = assignLHS op = assign_ops expr = assignable  # OperatorAssign
+    | data = tupleLiteral                                               # Tuple
+    | data = listLiteral                                                # List
+    | data = dictLiteral                                                # Dict
+    | atom = STRING                                                     # String
+    | atom = NUMBER                                                     # Number
+    | atom = SYMBOL                                                     # Symbol
+    | LS expression RS                                                  # PriorityExpression;
 add_ops: Plus | Minus; //@Inline
 pre_ops: Plus | Minus | Not; //@Inline
 bit_ops: LeftShift | RightShift; //@Inline
@@ -59,10 +66,13 @@ mul_ops
 list_ops: Concat | LeftShift | RightShift; //@Inline
 /*====================================================================================================================*/
 assign_statement
-    : op = Assign_mods id = assignTuple expr = assignable eos?; //@Inline
+    : op = assign_mods id = assignLHS expr = assignable eos?; //@Inline
 assignable: (expression | block_statement);
-assignTuple
-    : (SYMBOL | LS (assignPass (Comma assignPass)*)? Comma? RS);
+assignLHS
+    : SYMBOL                                         # SymbolAssign
+    | LS (assignPass (Comma assignPass)*)? Comma? RS # TupleAssign
+    | SYMBOL LM Integer RM                           # ListAssign
+    | SYMBOL LS Identifier RS                        # FunctionAssign;
 assignPass: Tilde | SYMBOL;
 assign_ops
     : Assign
@@ -71,7 +81,7 @@ assign_ops
     | LetAssign
     | FinalAssign; //@Inline
 lazy_assign: DelayedAssign;
-Assign_mods: Let | Final;
+assign_mods: Let | Final;
 /*====================================================================================================================*/
 module_statement
     : Using module = vaildModule
@@ -99,10 +109,11 @@ catchProduction: Catch LS? SYMBOL RS? block_statement;
 finalProduction: Final block_statement;
 /*====================================================================================================================*/
 // $antlr-format alignColons trailing;
-tupleLiteral  : LS (single (Comma single)*)? Comma? RS;
-single        : (STRING | NUMBER | BOOL);
-dictLiteral   : LL (keyvalue (Comma keyvalue)*)? Comma? RL;
-keyvalue      : (NUMBER | STRING | SYMBOL) Colon element;
+tupleLiteral : LS (single (Comma single)*)? Comma? RS;
+single       : (STRING | NUMBER | BOOL);
+dictLiteral  : LL (keyvalue (Comma keyvalue)*)? Comma? RL;
+keyvalue:
+    key = (NUMBER | STRING | SYMBOL) Colon value = element # KeyValue;
 listLiteral   : LM (element (Comma? element)*)? Comma? RM;
 element       : (expression | dictLiteral | listLiteral);
 signedInteger : (Plus | Minus)? Integer;
@@ -110,5 +121,6 @@ signedInteger : (Plus | Minus)? Integer;
 /*====================================================================================================================*/
 LineComment : Shebang ~[\r\n]* -> channel(HIDDEN);
 PartComment : Comment .*? Comment -> channel(HIDDEN);
+SYMBOL      : Identifier (Dot Identifier)*;
 WhiteSpace  : [\t\r\n \u000C]+ -> skip;
 NewLine     : ('\r'? '\n' | '\r')+ -> skip;

@@ -10,7 +10,10 @@ rmLine = !Or[
 	StringEndsQ[#, "@Inline"]
 ]&;
 out = If[StringContainsQ[#, "//"], First@StringSplit[#, "//"], #]& /@ Select[lines, rmLine];
-out[[1]] = "grammar NyarInline;\n// $antlr-format useTab false ;reflowComments false;\n// $antlr-format alignColons hanging;";
-rules=Flatten[replace /@ Select[lines, StringEndsQ["@Inline"]]];
-output = FixedPoint[StringReplace[#,rules]&,StringRiffle[out, "\n"]]
-Export["NyarInline.g4", output, "Text"];
+out[[1]] = "grammar Nyar;\n// $antlr-format useTab false ;reflowComments false;\n// $antlr-format alignColons hanging;";
+rules = Flatten[replace /@ Select[lines, StringEndsQ["@Inline"]]];
+output = FixedPoint[StringReplace[#, rules]&, StringRiffle[out, "\n"]]
+Export["../NyarInline/Nyar.g4", output, "Text"];
+Export["./NyarInline.g4", output, "Text"];
+CopyFile["NyarKeywords.g4", "../NyarInline/NyarKeywords.g4", OverwriteTarget -> True];
+CopyFile["NyarOperators.g4", "../NyarInline/NyarOperators.g4", OverwriteTarget -> True];

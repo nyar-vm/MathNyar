@@ -53,7 +53,7 @@ In    : 'in';
 BOOL    : True | False;
 NUMBER  : Integer | Float;
 STRING  : SimpleString;
-SYMBOL  : NameStartCharacter NameCharacter*; //Try JS | Julia
+Identifier  : NameStartCharacter NameCharacter*; //Try JS | Julia
 Integer : Digit+;
 Float   : Digit+ '.' Digit* | '.' Digit+;
 //UNICODE_ID : [\p{General_Category=Other_Letter}]*; May Allow # $ % with special meaning English +
