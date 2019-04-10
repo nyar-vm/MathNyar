@@ -38,8 +38,8 @@ expression
     | left = expression op = mul_ops right = expression                 # MultiplyLike
     | left = expression op = add_ops right = expression                 # PlusLike
     | left = expression op = list_ops right = expression                # ListLike
-    | id = function_apply op = lazy_assign expr = assignable            # LazyAssign
-    | <assoc = right> id = assignLHS op = assign_ops expr = assignable  # OperatorAssign
+    | id = function_apply op = assign_lazy expr = assignable            # LazyAssign
+    | <assoc = right> id = assign_lhs op = assign_ops expr = assignable # OperatorAssign
     | data = listLiteral                                                # List
     | left = expression data = indexLiteral                             # Index
     | data = dictLiteral                                                # Dict
@@ -71,36 +71,46 @@ mul_ops
 list_ops: Concat | LeftShift | RightShift; //@Inline
 /*====================================================================================================================*/
 assign_statement
-    : op = assign_mods id = assignLHS expr = assignable eos?; //@Inline
+    : op = assign_modifier id = assign_lhs expr = assignable eos?; //@Inline
 assignable: (expression | block_statement);
-assignLHS
-    : Identifier                                     # ValueAssign
-    | LS (assignPass (Comma assignPass)*)? Comma? RS # TupleAssign
-    | Identifier LM Integer RM                       # ListAssign
-    | Identifier LS Identifier RS                    # FunctionAssign;
-assignPass: Tilde | symbol;
+assign_lhs
+    : Identifier LS Identifier RS                      # AssignFunction
+    | Identifier                                       # AssignValue
+    | Identifier (Dot Identifier)+                     # AssignAttribute
+    | LS (assign_pass (Comma assign_pass)*)? Comma? RS # AssignWithTuple
+    | Identifier LM Integer RM                         # AssignWithList;
+assign_pass: Tilde | symbol;
 assign_ops
     : Assign
     | PlusTo
     | MinusFrom
     | LetAssign
     | FinalAssign; //@Inline
-lazy_assign: DelayedAssign;
-assign_mods: Let | Final;
+assign_lazy: DelayedAssign;
+assign_modifier: Let | Final;
 /*====================================================================================================================*/
 module_statement
-    : Using module = symbol controlModule? eos?               # ModuleInclude
+    : Using module = symbol module_controller? eos?           # ModuleInclude
     | Using module = symbol As alias = Identifier eos?        # ModuleAlias
     | Using source = symbol With name = Identifier eos?       # ModuleSymbol
     | Using module = symbol LL expression_statement+? RL eos? # ModuleResolve;
-controlModule: Times | Power;
+module_controller: Times | Power;
 /*====================================================================================================================*/
-class_statement: Class (LS RS)? classDefine eos? # SimpleClass;
-classDefine: expression;
+class_statement
+    : Class id = Identifier class_implement? class_define eos?               # ClassBase
+    | Class id = Identifier class_fathers class_implement? class_define eos? # ClassWithFather;
+class_fathers
+    : Extend father = symbol          # ClassFather
+    | LS father = symbol RS           # ClassFather
+    | LS (symbol (Comma symbol)+)? RS # ClassFathers;
+class_implement: (Implement | Colon) symbol # ClassImplement;
+class_define: LL expression RL # ClassDefine;
+/*====================================================================================================================*/
+interfaceStatement: Interface expression eos;
+/*====================================================================================================================*/
+templateStatement: Template expression eos;
 /*====================================================================================================================*/
 macroStatement: Macro expression eos;
-templateStatement: Template expression eos;
-interfaceStatement: Interface expression eos;
 /*====================================================================================================================*/
 if_statement
     : If condition (Else expr_block)? eos?        # SingleIf

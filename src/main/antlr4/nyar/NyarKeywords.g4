@@ -27,8 +27,8 @@ Template : 'template';
 /* Class */
 Interface : 'interface';
 Class     : 'class';
-Extends   : 'extends';
-Mixin     : 'mixin';
+Extend   : 'extend';
+Implement : 'implement';
 Setter    : 'setter';
 Getter    : 'getter';
 Public    : 'public';

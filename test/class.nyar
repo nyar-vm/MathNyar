@@ -1,0 +1,24 @@
+structure {
+    Name::String
+    Age::Integer
+}
+interface {
+
+
+
+}
+
+protocol
+delegate
+
+
+
+template Res_block(Graph) {
+    
+
+
+
+}
+
+
+

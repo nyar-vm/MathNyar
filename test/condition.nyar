@@ -3,7 +3,7 @@ if a 0;
 
 %%% 复杂判断 %%%
 if !a {1};
-%%% FIXME: if a==0||b==0 0 else 1; %%%
+%%% @FIXME: if a==0||b==0 0 else 1; %%%
 
 %%% else 语句 %%%
 if a 0 else 1;
