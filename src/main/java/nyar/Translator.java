@@ -10,17 +10,20 @@ public class Translator extends NyarBaseVisitor<String> {
         return result.toString();
     }
 
-    /*
+
     public String visitBlockStatement(NyarParser.BlockStatementContext ctx) {
         StringBuilder result = new StringBuilder();
         //System.out.print("Expression: " + ctx.getText() + "\n");
-        for (int i = 0; i < ctx.getChildCount() - 2; i++) {
+        for (int i = 0; i < ctx.getChildCount() - 1; i++) {
             System.out.print("Statement: " + ctx.statement(i).getText() + "\n");
             result.append(this.visit(ctx.statement(i)));
         }
         return result.toString();
     }
-    */
+
+
+
+
     public String visitEmptyStatement(NyarParser.EmptyStatementContext ctx) {
         //System.out.print("EmptyStatement!!\n");
         return "Null;";
@@ -50,13 +53,13 @@ public class Translator extends NyarBaseVisitor<String> {
 
     public String visitPrefixExpression(NyarParser.PrefixExpressionContext ctx) {
         String rhs = this.visit(ctx.right);
-        //System.out.printf("Operator: %s (%s);\n", ctx.op.getText(), rhs);
-        switch (ctx.op.getText()) {
-            case "+":
+        //System.out.printf("Operator: %s (%s);\n", ctx.op.getType(), rhs);
+        switch (ctx.op.getType()) {
+            case NyarParser.Plus:
                 return String.format("Plus[%s]", rhs);
-            case "-":
+            case NyarParser.Minus:
                 return String.format("Minus[%s]", rhs);
-            case "!":
+            case NyarParser.Not:
                 return String.format("Not[%s]", rhs);
             default:
                 return String.format("UnknowOperator[%s]", rhs);
@@ -75,10 +78,10 @@ public class Translator extends NyarBaseVisitor<String> {
         String lhs = this.visit(ctx.left);
         String rhs = this.visit(ctx.right);
         //System.out.printf("Operator: %s (%s,%s);\n", ctx.op.getText(), lhs, rhs);
-        switch (ctx.op.getText()) {
-            case "+":
+        switch (ctx.op.getType()) {
+            case NyarParser.Plus:
                 return String.format("Plus[%s,%s]", lhs, rhs);
-            case "-":
+            case NyarParser.Minus:
                 return String.format("Subtract[%s,%s]", lhs, rhs);
             default:
                 return String.format("UnknowOperator[%s,%s]", lhs, rhs);
@@ -89,10 +92,10 @@ public class Translator extends NyarBaseVisitor<String> {
         String lhs = this.visit(ctx.left);
         String rhs = this.visit(ctx.right);
         //System.out.printf("Operator: %s (%s,%s);\n", ctx.op.getText(), lhs, rhs);
-        switch (ctx.op.getText()) {
-            case "*":
+        switch (ctx.op.getType()) {
+            case NyarParser.Times:
                 return String.format("Times[%s,%s]", lhs, rhs);
-            case "/":
+            case NyarParser.Divide:
                 return String.format("Divide[%s,%s]", lhs, rhs);
             default:
                 return String.format("UnknowOperator[%s,%s]", lhs, rhs);
@@ -103,10 +106,10 @@ public class Translator extends NyarBaseVisitor<String> {
         String lhs = this.visit(ctx.left);
         String rhs = this.visit(ctx.right);
         //System.out.printf("Operator: %s (%s,%s);\n", ctx.op.getText(), lhs, rhs);
-        switch (ctx.op.getText()) {
-            case "^":
+        switch (ctx.op.getType()) {
+            case NyarParser.Power:
                 return String.format("Power[%s,%s]", lhs, rhs);
-            case "√":
+            case NyarParser.Surd:
                 return String.format("Surd[%s,%s]", rhs, lhs);
             default:
                 return String.format("UnknowOperator[%s,%s]", lhs, rhs);
@@ -134,21 +137,21 @@ public class Translator extends NyarBaseVisitor<String> {
         String lhs = this.visit(ctx.left);
         String rhs = this.visit(ctx.right);
         //System.out.printf("Operator: %s (%s,%s);\n", ctx.op.getText(), lhs, rhs);
-        switch (ctx.op.getText()) {
-            case ">":
+        switch (ctx.op.getType()) {
+            case NyarParser.Grater:
                 return String.format("Greater[%s,%s]", lhs, rhs);
-            case "<":
+            case NyarParser.Less:
                 return String.format("Less[%s,%s]", lhs, rhs);
-            case "==":
+            case NyarParser.Equal:
                 return String.format("Equal[%s,%s]", lhs, rhs);
-            case "!=":
+            case NyarParser.NotEqual:
                 return String.format("Unequal[%s,%s]", lhs, rhs);
             default:
                 return String.format("UnknowOperator[%s,%s]", lhs, rhs);
         }
     }
 
-    /*
+
     public String visitIfStatement(NyarParser.IfStatementContext ctx) {
         int else_count = ctx.elseif().Else().size();
         int then_count = 0;
@@ -159,8 +162,8 @@ public class Translator extends NyarBaseVisitor<String> {
         //System.out.printf("ElseIf Count: %s\n", else_count + then_count);
         switch (else_count + then_count) {
             case 0: {
-                String cond = this.visit(ctx.condition().expression());
-                String then = this.visit(ctx.condition().expr_block());
+                String cond = this.visit(ctx.condition());
+                String then = this.visit(ctx.condition().expression(0));
                 return String.format("Nyar`Core`If[%s,%s]", cond, then);
             }
             case 1: {
@@ -183,20 +186,20 @@ public class Translator extends NyarBaseVisitor<String> {
                 String cond = this.visit(ctx.condition().expression());
                 String then = this.visit(ctx.condition().expr_block());
                 //String expr = this.visit(ctx.expr_block());
-                String result = "Nyar`Core`ElseIf[" + cond + "," + then;
+                StringBuilder result = new StringBuilder("Nyar`Core`ElseIf[" + cond + "," + then);
                 for (int i = 0; i < else_count; i++) {
-                    result += this.visit(ctx.elseif().condition(i).expression()) + ","
-                            + this.visit(ctx.elseif().condition(i).expr_block()) + ",";
-                    //result += this.visit(ctx.elseifStatement().condition(i));
+                    result
+                            .append(this.visit(ctx.elseif().condition(i).expression())).append(",")
+                            .append(this.visit(ctx.elseif().condition(i).expr_block())).append(",");
                 }
                 if (then_count == 1) {
-                    result += this.visit(ctx.expr_block()) + "]";
+                    result.append(this.visit(ctx.expr_block())).append("]");
                 } else {
-                    result += "]";
+                    result.append("]");
                 }
-                return result;
+                return result.toString();
             }
         }
 
-    }*/
+    }
 }

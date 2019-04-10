@@ -16,13 +16,14 @@ block_statement: LL statement+? RL; //@Inline
 expr_block: block_statement | expression; //@Inline
 /*====================================================================================================================*/
 empty_statement: eos; //@Inline
-eos: Semicolon;
+eos: Semicolon; //@Inline
+symbol: Identifier (Dot Identifier)*; //@Inline
 /*====================================================================================================================*/
 expression_statement
     : expression (Comma expression)* eos?; //@Inline
 type_statement
-    : left = SYMBOL op = TypeAnnotation right = expression; //@Inline
-function_apply: SYMBOL LS function_params? RS; //@Inline
+    : left = Identifier op = TypeAnnotation right = expression; //@Inline
+function_apply: symbol LS function_params? RS; //@Inline
 function_params: expression (Comma expression)*;
 // High computing priority in the front
 expression
@@ -42,7 +43,7 @@ expression
     | data = dictLiteral                                                # Dict
     | atom = STRING                                                     # String
     | atom = NUMBER                                                     # Number
-    | atom = SYMBOL                                                     # Symbol
+    | atom = symbol                                                     # SymbolExpression
     | LS expression RS                                                  # PriorityExpression;
 add_ops: Plus | Minus; //@Inline
 pre_ops: Plus | Minus | Not; //@Inline
@@ -69,11 +70,11 @@ assign_statement
     : op = assign_mods id = assignLHS expr = assignable eos?; //@Inline
 assignable: (expression | block_statement);
 assignLHS
-    : SYMBOL                                         # SymbolAssign
+    : Identifier                                     # ValueAssign
     | LS (assignPass (Comma assignPass)*)? Comma? RS # TupleAssign
-    | SYMBOL LM Integer RM                           # ListAssign
-    | SYMBOL LS Identifier RS                        # FunctionAssign;
-assignPass: Tilde | SYMBOL;
+    | Identifier LM Integer RM                       # ListAssign
+    | Identifier LS Identifier RS                    # FunctionAssign;
+assignPass: Tilde | symbol;
 assign_ops
     : Assign
     | PlusTo
@@ -84,11 +85,10 @@ lazy_assign: DelayedAssign;
 assign_mods: Let | Final;
 /*====================================================================================================================*/
 module_statement
-    : Using module = vaildModule
-    | Using module = vaildModule As alias = SYMBOL
-    | Using source = vaildModule With name = SYMBOL
-    | Using module = vaildModule LL expression_statement+? RL; //@Inline
-vaildModule: SYMBOL (Dot SYMBOL)*?;
+    : Using module = symbol controlModule? eos?               # ModuleInclude
+    | Using module = symbol As alias = Identifier eos?        # ModuleAlias
+    | Using source = symbol With name = Identifier eos?       # ModuleSymbol
+    | Using module = symbol LL expression_statement+? RL eos? # ModuleResolve;
 controlModule: Times | Power;
 /*====================================================================================================================*/
 macroStatement: Macro expression eos;
@@ -101,19 +101,19 @@ if_statement
 condition: LS? expression expr_block RS?;
 elseif: (Else If condition)*;
 /*====================================================================================================================*/
-//TODO: USE expr_block
 try_statement
     : Try block_statement finalProduction
     | Try block_statement (catchProduction finalProduction?); //@Inline
-catchProduction: Catch LS? SYMBOL RS? block_statement;
+catchProduction: Catch LS? symbol RS? block_statement;
 finalProduction: Final block_statement;
+//TODO: USE expr_block
 /*====================================================================================================================*/
 // $antlr-format alignColons trailing;
-tupleLiteral : LS (single (Comma single)*)? Comma? RS;
-single       : (STRING | NUMBER | BOOL);
-dictLiteral  : LL (keyvalue (Comma keyvalue)*)? Comma? RL;
-keyvalue:
-    key = (NUMBER | STRING | SYMBOL) Colon value = element # KeyValue;
+tupleLiteral  : LS (single (Comma single)*)? Comma? RS;
+single        : (STRING | NUMBER | BOOL);
+dictLiteral   : LL (keyvalue (Comma keyvalue)*)? Comma? RL;
+keyvalue      : key = keys Colon value = element # KeyValue;
+keys          : (NUMBER | STRING | symbol);
 listLiteral   : LM (element (Comma? element)*)? Comma? RM;
 element       : (expression | dictLiteral | listLiteral);
 signedInteger : (Plus | Minus)? Integer;
@@ -121,6 +121,5 @@ signedInteger : (Plus | Minus)? Integer;
 /*====================================================================================================================*/
 LineComment : Shebang ~[\r\n]* -> channel(HIDDEN);
 PartComment : Comment .*? Comment -> channel(HIDDEN);
-SYMBOL      : Identifier (Dot Identifier)*;
 WhiteSpace  : [\t\r\n \u000C]+ -> skip;
 NewLine     : ('\r'? '\n' | '\r')+ -> skip;

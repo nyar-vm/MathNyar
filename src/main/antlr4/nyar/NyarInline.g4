@@ -4,29 +4,31 @@ grammar NyarInline;
 import NyarKeywords, NyarOperators;
 program: statement* EOF;
 statement
-    : (eos)                                                      # EmptyStatement
-    | ( LL statement+? RL)                                       # BlockStatement
-    | (expression (Comma expression)* eos?)                      # ExpressionStatement
-    | (op = Assign_mods id = assignTuple expr = assignable eos?) # AssignStatement
-    | (If condition elseif (Else expr_block)? eos?)              # IfStatement
+    : (( Semicolon))                                 # EmptyStatement
+    | ( LL statement+? RL)                           # BlockStatement
+    | (expression (Comma expression)* ( Semicolon)?) # ExpressionStatement
+    | (
+        op = assign_mods id = assignLHS expr = assignable (
+            Semicolon
+        )?
+    ) # AssignStatement
+    | (
+        If condition elseif (
+            Else (( LL statement+? RL) | expression)
+        )? (Semicolon)?
+    ) # IfStatement
     | (
         Try ( LL statement+? RL) finalProduction
         | Try (LL statement+? RL) (
             catchProduction finalProduction?
         )
-    ) # TryStatement
-    | (
-        Using module = vaildModule
-        | Using module = vaildModule As alias = SYMBOL
-        | Using source = vaildModule With name = SYMBOL
-        | Using module = vaildModule LL (
-            expression (Comma expression)* eos?
-        )+? RL
-    ) # ModuleStatement;
-expr_block: ( LL statement+? RL) | expression;
-eos: Semicolon;
+    )                  # TryStatement
+    | module_statement # ModuleStatement;
+function_params: expression (Comma expression)*;
 expression
-    : op = (Plus | Minus | Not) right = expression                       # PrefixExpression
+    : (left = Identifier op = TypeAnnotation right = expression)         # TypeStatement
+    | (( Identifier (Dot Identifier)*) LS function_params? RS)           # FunctionApply
+    | op = (Plus | Minus | Not) right = expression                       # PrefixExpression
     | left = expression op = (LeftShift | RightShift) right = expression # BinaryLike
     | left = expression op = (
         Equal
@@ -48,40 +50,63 @@ expression
     ) right = expression                                                          # MultiplyLike
     | left = expression op = (Plus | Minus) right = expression                    # PlusLike
     | left = expression op = (Concat | LeftShift | RightShift) right = expression # ListLike
-    | <assoc = right> id = assignTuple op = (
+    | id = (
+        (Identifier (Dot Identifier)*) LS function_params? RS
+    ) op = lazy_assign expr = assignable # LazyAssign
+    | <assoc = right> id = assignLHS op = (
         Assign
         | PlusTo
         | MinusFrom
         | LetAssign
         | FinalAssign
-    ) expr = assignable   # OperatorAssign
-    | data = tupleLiteral # Tuple
-    | data = listLiteral  # List
-    | data = dictLiteral  # Dict
-    | atom = STRING       # String
-    | atom = NUMBER       # Number
-    | atom = SYMBOL       # Symbol
-    | LS expression RS    # PriorityExpression;
+    ) expr = assignable                     # OperatorAssign
+    | data = tupleLiteral                   # Tuple
+    | data = listLiteral                    # List
+    | data = dictLiteral                    # Dict
+    | atom = STRING                         # String
+    | atom = NUMBER                         # Number
+    | atom = (Identifier (Dot Identifier)*) # SymbolExpression
+    | LS expression RS                      # PriorityExpression;
 assignable: (expression | ( LL statement+? RL));
-assignTuple
-    : (SYMBOL | LS (assignPass (Comma assignPass)*)? Comma? RS);
-assignPass: Tilde | SYMBOL;
+assignLHS
+    : Identifier                                     # ValueAssign
+    | LS (assignPass (Comma assignPass)*)? Comma? RS # TupleAssign
+    | Identifier LM Integer RM                       # ListAssign
+    | Identifier LS Identifier RS                    # FunctionAssign;
+assignPass: Tilde | ( Identifier (Dot Identifier)*);
 lazy_assign: DelayedAssign;
-Assign_mods: Let | Final;
-vaildModule: SYMBOL (Dot SYMBOL)*?;
+assign_mods: Let | Final;
+module_statement
+    : Using module = (Identifier (Dot Identifier)*) controlModule? (
+        Semicolon
+    )? # ModuleInclude
+    | Using module = (Identifier (Dot Identifier)*) As alias = Identifier (
+        Semicolon
+    )? # ModuleAlias
+    | Using source = (Identifier (Dot Identifier)*) With name = Identifier (
+        Semicolon
+    )? # ModuleSymbol
+    | Using module = (Identifier (Dot Identifier)*) LL (
+        expression (Comma expression)* (Semicolon)?
+    )+? RL (Semicolon)? # ModuleResolve;
 controlModule: Times | Power;
-macroStatement: Macro expression eos;
-templateStatement: Template expression eos;
-interfaceStatement: Interface expression eos;
-classStatement: Class expression eos;
-condition: LS? expression expr_block RS?;
+macroStatement: Macro expression ( Semicolon);
+templateStatement: Template expression ( Semicolon);
+interfaceStatement: Interface expression ( Semicolon);
+classStatement: Class expression ( Semicolon);
+condition
+    : LS? expression (( LL statement+? RL) | expression) RS?;
 elseif: (Else If condition)*;
-catchProduction: Catch LS? SYMBOL RS? ( LL statement+? RL);
+catchProduction
+    : Catch LS? (Identifier (Dot Identifier)*) RS? (
+        LL statement+? RL
+    );
 finalProduction: Final ( LL statement+? RL);
 tupleLiteral: LS (single (Comma single)*)? Comma? RS;
 single: (STRING | NUMBER | BOOL);
 dictLiteral: LL (keyvalue (Comma keyvalue)*)? Comma? RL;
-keyvalue: (NUMBER | STRING | SYMBOL) Colon element;
+keyvalue: key = keys Colon value = element # KeyValue;
+keys: (NUMBER | STRING | ( Identifier (Dot Identifier)*));
 listLiteral: LM (element (Comma? element)*)? Comma? RM;
 element: (expression | dictLiteral | listLiteral);
 signedInteger: (Plus | Minus)? Integer;
