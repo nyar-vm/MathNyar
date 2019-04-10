@@ -10,20 +10,22 @@ statement
     | assign_statement     # AssignStatement
     | if_statement         # IfStatement
     | try_statement        # TryStatement
-    | module_statement     # ModuleStatement;
+    | module_statement     # ModuleStatement
+    | class_statement      # ClassStatement;
 /*====================================================================================================================*/
 block_statement: LL statement+? RL; //@Inline
-expr_block: block_statement | expression; //@Inline
+expr_block: block_statement | expression;
 /*====================================================================================================================*/
 empty_statement: eos; //@Inline
-eos: Semicolon; //@Inline
-symbol: Identifier (Dot Identifier)*; //@Inline
+eos: Semicolon;
+symbol: Identifier (Dot Identifier)*;
 /*====================================================================================================================*/
 expression_statement
     : expression (Comma expression)* eos?; //@Inline
 type_statement
-    : left = Identifier op = TypeAnnotation right = expression; //@Inline
-function_apply: symbol LS function_params? RS; //@Inline
+    : left = Identifier TypeAnnotation right = expression # TypeAssign
+    | Type left = Identifier right = expression           # TypeAssign;
+function_apply: symbol LS function_params? RS;
 function_params: expression (Comma expression)*;
 // High computing priority in the front
 expression
@@ -38,15 +40,15 @@ expression
     | left = expression op = list_ops right = expression                # ListLike
     | id = function_apply op = lazy_assign expr = assignable            # LazyAssign
     | <assoc = right> id = assignLHS op = assign_ops expr = assignable  # OperatorAssign
-    | data = tupleLiteral                                               # Tuple
     | data = listLiteral                                                # List
+    | left = expression data = indexLiteral                             # Index
     | data = dictLiteral                                                # Dict
     | atom = STRING                                                     # String
     | atom = NUMBER                                                     # Number
     | atom = symbol                                                     # SymbolExpression
     | LS expression RS                                                  # PriorityExpression;
 add_ops: Plus | Minus; //@Inline
-pre_ops: Plus | Minus | Not; //@Inline
+pre_ops: Plus | Minus | Not | LogicNot; //@Inline
 bit_ops: LeftShift | RightShift; //@Inline
 logic_ops
     : Equal
@@ -56,7 +58,9 @@ logic_ops
     | Grater
     | GraterEqual
     | Less
-    | LessEqual; //@Inline
+    | LessEqual
+    | LogicAnd
+    | LogicOr; //@Inline
 pow_ops: Power | Surd; //@Inline
 mul_ops
     : Divide
@@ -91,14 +95,17 @@ module_statement
     | Using module = symbol LL expression_statement+? RL eos? # ModuleResolve;
 controlModule: Times | Power;
 /*====================================================================================================================*/
+class_statement: Class (LS RS)? classDefine eos? # SimpleClass;
+classDefine: expression;
+/*====================================================================================================================*/
 macroStatement: Macro expression eos;
 templateStatement: Template expression eos;
 interfaceStatement: Interface expression eos;
-classStatement: Class expression eos;
 /*====================================================================================================================*/
 if_statement
-    : If condition elseif (Else expr_block)? eos?; //@Inline
-condition: LS? expression expr_block RS?;
+    : If condition (Else expr_block)? eos?        # SingleIf
+    | If condition elseif (Else expr_block)? eos? # NestedIf;
+condition: LS? expression expr_block RS? # ConditionStatement;
 elseif: (Else If condition)*;
 /*====================================================================================================================*/
 try_statement
@@ -109,13 +116,13 @@ finalProduction: Final block_statement;
 //TODO: USE expr_block
 /*====================================================================================================================*/
 // $antlr-format alignColons trailing;
-tupleLiteral  : LS (single (Comma single)*)? Comma? RS;
-single        : (STRING | NUMBER | BOOL);
 dictLiteral   : LL (keyvalue (Comma keyvalue)*)? Comma? RL;
-keyvalue      : key = keys Colon value = element # KeyValue;
-keys          : (NUMBER | STRING | symbol);
+keyvalue      : key = key_valid Colon value = element;
+key_valid     : (NUMBER | STRING | symbol);
 listLiteral   : LM (element (Comma? element)*)? Comma? RM;
 element       : (expression | dictLiteral | listLiteral);
+indexLiteral  : LM index_valid (Comma? index_valid)+? RM;
+index_valid   : (symbol | Integer) Colon?;
 signedInteger : (Plus | Minus)? Integer;
 //FIXME: replace NUMBER with signedInteger
 /*====================================================================================================================*/

@@ -1,6 +1,7 @@
 lexer grammar NyarKeywords;
 // $antlr-format useTab false; reflowComments false;
 // $antlr-format alignColons trailing;
+
 fragment Digit              : [0-9];
 fragment OctalDigit         : [0-7];
 fragment HexDigit           : [0-9a-fA-F];
@@ -37,8 +38,7 @@ Final     : 'final';
 
 /* Function */
 Let   : 'let';
-True  : 'true';
-False : 'false';
+Type: 'type';
 
 /* Condition */
 If   : 'if';
@@ -49,3 +49,16 @@ Try   : 'try';
 Catch : 'catch';
 For   : 'for';
 In    : 'in';
+
+/* Constant */
+True  : 'true';
+False : 'false';
+
+BOOL        : True | False;
+STRING      : SimpleString;
+Identifier  : NameStartCharacter NameCharacter*; //Try JS | Julia
+NUMBER      : Integer | Float;
+Float       : Digit+ '.' Digit* | '.' Digit+;
+Integer     : Digit+;
+//UNICODE_ID : [\p{General_Category=Other_Letter}]*; May Allow # $ % with special meaning English +
+// Chinese + Japanese + Greeks

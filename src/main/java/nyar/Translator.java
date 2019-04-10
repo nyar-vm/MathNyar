@@ -22,8 +22,6 @@ public class Translator extends NyarBaseVisitor<String> {
     }
 
 
-
-
     public String visitEmptyStatement(NyarParser.EmptyStatementContext ctx) {
         //System.out.print("EmptyStatement!!\n");
         return "Null;";
@@ -66,6 +64,7 @@ public class Translator extends NyarBaseVisitor<String> {
         }
     }
 
+
     public String visitOperatorAssign(NyarParser.OperatorAssignContext ctx) {
         String id = ctx.id.getText();
         String expr = this.visit(ctx.expr);
@@ -102,6 +101,7 @@ public class Translator extends NyarBaseVisitor<String> {
         }
     }
 
+
     public String visitPowerLike(NyarParser.PowerLikeContext ctx) {
         String lhs = this.visit(ctx.left);
         String rhs = this.visit(ctx.right);
@@ -116,6 +116,7 @@ public class Translator extends NyarBaseVisitor<String> {
         }
     }
 
+
     public String visitNumber(NyarParser.NumberContext ctx) {
         //System.out.printf("%s\n", ctx.getText());
         switch (ctx.atom.getType()) {
@@ -128,10 +129,12 @@ public class Translator extends NyarBaseVisitor<String> {
         }
     }
 
+
     public String visitSymbol(NyarParser.SymbolContext ctx) {
         //System.out.printf("%s\n", ctx.getText());
         return ctx.getText();
     }
+
 
     public String visitLogicLike(NyarParser.LogicLikeContext ctx) {
         String lhs = this.visit(ctx.left);
@@ -152,6 +155,18 @@ public class Translator extends NyarBaseVisitor<String> {
     }
 
 
+    public String visitSingleIf(NyarParser.SingleIfContext ctx) {
+        System.out.printf("IfStatement: %s", ctx.condition().getText());
+        return visitChildren(ctx);
+    }
+
+
+    public String visitNestedIf(NyarParser.NestedIfContext ctx) {
+        return visitChildren(ctx);
+    }
+
+
+    /*
     public String visitIfStatement(NyarParser.IfStatementContext ctx) {
         int else_count = ctx.elseif().Else().size();
         int then_count = 0;
@@ -201,5 +216,5 @@ public class Translator extends NyarBaseVisitor<String> {
             }
         }
 
-    }
+    }*/
 }
