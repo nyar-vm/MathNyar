@@ -4,27 +4,30 @@ grammar NyarInline;
 import NyarKeywords, NyarOperators;
 program: statement* EOF;
 statement
-    : (eos)                                                    # EmptyStatement
-    | ( LL statement+? RL)                                     # BlockStatement
-    | (expression (Comma expression)* eos?)                    # ExpressionStatement
-    | (op = assign_mods id = assignLHS expr = assignable eos?) # AssignStatement
-    | if_statement                                             # IfStatement
-    | (
-        Try ( LL statement+? RL) finalProduction
-        | Try (LL statement+? RL) (
-            catchProduction finalProduction?
-        )
-    )                  # TryStatement
-    | module_statement # ModuleStatement;
-expr_block: ( LL statement+? RL) | expression;
+    : empty_statement
+    | block_statement
+    | expression_statement eos?
+    | assign_statement
+    | if_statement eos?
+    | try_statement eos?
+    | module_statement eos?
+    | class_statement eos?;
+block_statement: LL statement+? RL # BlockStatement;
+expr_or_block: (block_statement | expression);
+empty_statement: eos # EmptyStatement;
 eos: Semicolon;
 symbol: Identifier (Dot Identifier)*;
+expression_statement
+    : expression (Comma expression)* # ExpressionStatement;
+type_statement
+    : left = Identifier TypeAnnotation right = expression # TypeAssign
+    | Type left = Identifier right = expression           # TypeAssign;
 function_apply: symbol LS function_params? RS;
 function_params: expression (Comma expression)*;
 expression
-    : (left = Identifier op = TypeAnnotation right = expression)         # TypeStatement
+    : type_statement                                                     # TypeStatement
     | function_apply                                                     # FunctionApply
-    | op = (Plus | Minus | Not) right = expression                       # PrefixExpression
+    | op = (Plus | Minus | Not | LogicNot) right = expression            # PrefixExpression
     | left = expression op = (LeftShift | RightShift) right = expression # BinaryLike
     | left = expression op = (
         Equal
@@ -35,6 +38,8 @@ expression
         | GraterEqual
         | Less
         | LessEqual
+        | LogicAnd
+        | LogicOr
     ) right = expression                                                       # LogicLike
     | <assoc = right> left = expression op = (Power | Surd) right = expression # PowerLike
     | left = expression op = (
@@ -46,56 +51,67 @@ expression
     ) right = expression                                                          # MultiplyLike
     | left = expression op = (Plus | Minus) right = expression                    # PlusLike
     | left = expression op = (Concat | LeftShift | RightShift) right = expression # ListLike
-    | id = function_apply op = lazy_assign expr = assignable                      # LazyAssign
-    | <assoc = right> id = assignLHS op = (
+    | id = function_apply op = DelayedAssign expr = assignable                    # LazyAssign
+    | <assoc = right> id = assign_lhs op = (
         Assign
         | PlusTo
         | MinusFrom
         | LetAssign
         | FinalAssign
-    ) expr = assignable   # OperatorAssign
-    | data = tupleLiteral # Tuple
-    | data = listLiteral  # List
-    | data = dictLiteral  # Dict
-    | atom = STRING       # String
-    | atom = NUMBER       # Number
-    | atom = symbol       # SymbolExpression
-    | LS expression RS    # PriorityExpression;
-assignable: (expression | ( LL statement+? RL));
-assignLHS
-    : Identifier                                     # ValueAssign
-    | LS (assignPass (Comma assignPass)*)? Comma? RS # TupleAssign
-    | Identifier LM Integer RM                       # ListAssign
-    | Identifier LS Identifier RS                    # FunctionAssign;
-assignPass: Tilde | symbol;
-lazy_assign: DelayedAssign;
-assign_mods: Let | Final;
+    ) expr = assignable                     # OperatorAssign
+    | data = listLiteral                    # List
+    | left = expression data = indexLiteral # Index
+    | data = dictLiteral                    # Dict
+    | atom = STRING                         # String
+    | atom = NUMBER                         # Number
+    | atom = symbol                         # SymbolExpression
+    | LS expression RS                      # PriorityExpression;
+assign_statement
+    : op = (Let | Final) id = assign_lhs expr = assignable eos? # AssignStatement;
+assignable: (expression | block_statement);
+assign_lhs
+    : Identifier LS Identifier RS                      # AssignFunction
+    | Identifier                                       # AssignValue
+    | Identifier (Dot Identifier)+                     # AssignAttribute
+    | LS (assign_pass (Comma assign_pass)*)? Comma? RS # AssignWithTuple
+    | Identifier LM Integer RM                         # AssignWithList;
+assign_pass: Tilde | symbol;
 module_statement
-    : Using module = symbol controlModule? eos?         # ModuleInclude
-    | Using module = symbol As alias = Identifier eos?  # ModuleAlias
-    | Using source = symbol With name = Identifier eos? # ModuleSymbol
-    | Using module = symbol LL (
-        expression (Comma expression)* eos?
-    )+? RL eos? # ModuleResolve;
-controlModule: Times | Power;
-macroStatement: Macro expression eos;
-templateStatement: Template expression eos;
-interfaceStatement: Interface expression eos;
-classStatement: Class expression eos;
+    : Using module = symbol (Times | Power)?             # ModuleInclude
+    | Using module = symbol As alias = Identifier        # ModuleAlias
+    | Using source = symbol With name = Identifier       # ModuleSymbol
+    | Using module = symbol LL expression_statement+? RL # ModuleResolve;
+class_statement
+    : Class id = Identifier class_implement? class_define               # ClassBase
+    | Class id = Identifier class_fathers class_implement? class_define # ClassWithFather;
+class_fathers
+    : Extend father = symbol          # ClassFather
+    | LS father = symbol RS           # ClassFather
+    | LS (symbol (Comma symbol)+)? RS # ClassFathers;
+class_implement: (Implement | Colon) symbol # ClassImplement;
+class_define: LL expression RL # ClassDefine;
+interface_Statement: Interface expression eos;
+template_Statement: Template expression eos;
+macro_Statement: Macro expression eos;
 if_statement
-    : If condition (Else expr_block)? eos?        # SingleIf
-    | If condition elseif (Else expr_block)? eos? # NestedIf;
-condition: LS? expression expr_block RS? # IfCondition;
-elseif: (Else If condition)*;
-catchProduction: Catch LS? symbol RS? ( LL statement+? RL);
-finalProduction: Final ( LL statement+? RL);
-tupleLiteral: LS (single (Comma single)*)? Comma? RS;
-single: (STRING | NUMBER | BOOL);
+    : If condition_statement expr_or_block else_statement?            # IfSingle
+    | If condition_statement expr_or_block if_elseif* else_statement? # IfNested;
+if_elseif
+    : Else If condition_statement expr_or_block # ElseIfStatement;
+else_statement: Else expr_or_block # ElseStatement;
+condition_statement: LS? expression RS? # ConditionStatement;
+try_statement
+    : Try block_statement finalProduction
+    | Try block_statement (catchProduction finalProduction?);
+catchProduction: Catch LS? symbol RS? block_statement;
+finalProduction: Final block_statement;
 dictLiteral: LL (keyvalue (Comma keyvalue)*)? Comma? RL;
-keyvalue: key = keys Colon value = element # KeyValue;
-keys: (NUMBER | STRING | symbol);
+keyvalue: key = key_valid Colon value = element;
+key_valid: (NUMBER | STRING | symbol);
 listLiteral: LM (element (Comma? element)*)? Comma? RM;
 element: (expression | dictLiteral | listLiteral);
+indexLiteral: LM index_valid (Comma? index_valid)+? RM;
+index_valid: (symbol | Integer) Colon?;
 signedInteger: (Plus | Minus)? Integer;
 LineComment: Shebang ~[\r\n]* -> channel(HIDDEN);
 PartComment: Comment .*? Comment -> channel(HIDDEN);

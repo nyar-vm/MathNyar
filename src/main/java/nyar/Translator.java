@@ -19,17 +19,17 @@ public class Translator extends NyarBaseVisitor<String> {
         }
     }
 
-    /*
+
     public String visitBlockStatement(NyarParser.BlockStatementContext ctx) {
-        StringBuilder result = new StringBuilder();
-        //System.out.print("Expression: " + ctx.getText() + "\n");
-        for (int i = 0; i < ctx.getChildCount() - 1; i++) {
-            System.out.print("Statement: " + ctx.statement(i).getText() + "\n");
-            result.append(this.visit(ctx.statement(i)));
+        String result = "";
+        //System.out.print("Block: " + ctx.getText() + "\n");
+        //TODO: FIX null
+        for (int i = 0; i < ctx.statement().size(); i++) {
+            //FIXME: NORETURN
+            result += this.visitStatement(ctx.statement(i));
         }
-        return result.toString();
+        return result;
     }
-    */
 
 
     public String visitEmptyStatement(NyarParser.EmptyStatementContext ctx) {
@@ -41,14 +41,10 @@ public class Translator extends NyarBaseVisitor<String> {
     public String visitExpressionStatement(NyarParser.ExpressionStatementContext ctx) {
         StringBuilder result = new StringBuilder();
         for (int i = 1; i < ctx.getChildCount(); i++) {
-            //System.out.print("Expression: " + ctx.expression(i-1).getText() + "\n");
+            System.out.print("Expression: " + ctx.expression(i - 1).getText() + "\n");
             result.append(this.visit(ctx.expression(i - 1)));
         }
-        if (ctx.eos() != null) {
-            return result.toString() + ";";
-        } else {
-            return result.toString();
-        }
+        return result.toString();
     }
 
 
@@ -164,6 +160,13 @@ public class Translator extends NyarBaseVisitor<String> {
         }
     }
 
+
+    public String visitConditionStatement(NyarParser.ConditionStatementContext ctx) {
+        //System.out.print("Condition: " + ctx.getText() + '\n');
+        return this.visit(ctx.expression());
+    }
+
+
     public String visitIfSingle(NyarParser.IfSingleContext ctx) {
         String cond = this.visit(ctx.condition_statement());
         String then = this.visit(ctx.expr_or_block());
@@ -181,17 +184,17 @@ public class Translator extends NyarBaseVisitor<String> {
     public String visitIfNested(NyarParser.IfNestedContext ctx) {
         String cond = this.visit(ctx.condition_statement());
         String then = this.visit(ctx.expr_or_block());
-        String result = "";
+        StringBuilder result = new StringBuilder();
         for (int i = 0; i < ctx.if_elseif().size(); i++) {
-            System.out.print("ElseIf: " + ctx.if_elseif(i).getText() + '\n');
-            result += this.visit(ctx.if_elseif(i));
+            //System.out.print("IfNested: " + ctx.if_elseif(i).getText() + '\n');
+            result.append(this.visit(ctx.if_elseif(i)));
         }
         if (ctx.else_statement() != null) {
             String otherwise = this.visit(ctx.else_statement());
-            return String.format("Nyar`Core`ElseIf[%s,%s,%s%s]", cond, then, result, otherwise);
+            return String.format("Nyar`Core`ElseIf[%s,%s,%s%s]", cond, then, result.toString(), otherwise);
         } else {
-            result = result.substring(0, result.length() - 1);
-            return String.format("Nyar`Core`ElseIf[%s,%s,%s]", cond, then, result);
+            result = new StringBuilder(result.substring(0, result.length() - 1));
+            return String.format("Nyar`Core`ElseIf[%s,%s,%s]", cond, then, result.toString());
         }
     }
 

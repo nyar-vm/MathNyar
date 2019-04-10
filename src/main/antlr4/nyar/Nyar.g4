@@ -6,7 +6,7 @@ program: statement* EOF;
 statement
     : empty_statement
     | block_statement
-    | expression_statement
+    | expression_statement eos?
     | assign_statement
     | if_statement eos?
     | try_statement eos?
@@ -14,14 +14,14 @@ statement
     | class_statement eos?;
 /*====================================================================================================================*/
 block_statement: LL statement+? RL # BlockStatement;
-expr_or_block: block_statement | expression;
+expr_or_block: (block_statement | expression);
 /*====================================================================================================================*/
 empty_statement: eos # EmptyStatement;
 eos: Semicolon;
 symbol: Identifier (Dot Identifier)*;
 /*====================================================================================================================*/
 expression_statement
-    : expression (Comma expression)* eos? # ExpressionStatement;
+    : expression (Comma expression)* # ExpressionStatement;
 type_statement
     : left = Identifier TypeAnnotation right = expression # TypeAssign
     | Type left = Identifier right = expression           # TypeAssign;
