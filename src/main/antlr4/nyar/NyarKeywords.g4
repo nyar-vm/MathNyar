@@ -49,12 +49,3 @@ Try   : 'try';
 Catch : 'catch';
 For   : 'for';
 In    : 'in';
-
-BOOL    : True | False;
-NUMBER  : Integer | Float;
-STRING  : SimpleString;
-Identifier  : NameStartCharacter NameCharacter*; //Try JS | Julia
-Integer : Digit+;
-Float   : Digit+ '.' Digit* | '.' Digit+;
-//UNICODE_ID : [\p{General_Category=Other_Letter}]*; May Allow # $ % with special meaning English +
-// Chinese + Japanese + Greeks

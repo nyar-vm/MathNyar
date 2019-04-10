@@ -51,8 +51,13 @@ NotEquivalent   : '=!=';
 Equal           : '==';
 Infer           : '=>' | '\u27F9'; //U+27F9 ⟹
 Assign          : '=';
-Bar2            : '||' | '\u2016'; //U+2016 ‖
-Bar             : '|'; // ∧(2227) & && ∨(2228) ∩(2229) ∪(222A)
+LogicOr         : '||' | '\u2016'; //U+2016 ‖
+Or              : '|'; // ∧(2227) & && ∨(2228) ∩(2229) ∪(222A)
+LogicAnd        : '&&';
+And             : '&';
+NotEqual        : '!=' | '\u2260'; //U+2260 ≠
+LogicNot        : '!' | '\uFF01'; //U+FF01 ！
+Not             : '\u00AC'; //U+00AC ¬
 Shebang         : '#!';
 PostfixFunction : '$';
 Curry           : '@@@';
@@ -61,16 +66,14 @@ LetAssign       : '@=';
 At              : '@';
 TypeAnnotation  : '::' | '\u2237'; //U+2237 ∷
 DelayedAssign   : ':=' | '\u2254'; //U+2254 ≔
-Colon           : ':';
-Semicolon       : ';';
+Colon           : ':' | '\uFF1A'; //U+FF1A ：
+Semicolon       : ';' | '\uFF1B'; //U+FF1B ；
 Quote           : '`';
 Acute           : '\u00B4'; // U+00B4 ´
-NotEqual        : '!=' | '\u2260'; //U+2260 ≠
-Not             : '!' | '\u00AC'; //U+00AC ¬
 Ellipsis        : '...';
 FinalAssign     : '.=';
-Dot             : '.';
-Comma           : ',';
+Dot             : '.' | '\u3002'; //U+3002 。
+Comma           : ',' | '\uFF0C'; //U+FF0C ，
 Quotation       : '\'';
 Map             : '/@';
 MapAll          : '//@';
