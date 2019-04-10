@@ -29,6 +29,8 @@ Interface : 'interface';
 Class     : 'class';
 Extend   : 'extend';
 Implement : 'implement';
+
+/* Access Control */
 Setter    : 'setter';
 Getter    : 'getter';
 Public    : 'public';

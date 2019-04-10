@@ -4,24 +4,24 @@ import NyarKeywords, NyarOperators;
 // $antlr-format alignColons hanging;
 program: statement* EOF;
 statement
-    : empty_statement      # EmptyStatement
-    | block_statement      # BlockStatement
-    | expression_statement # ExpressionStatement
-    | assign_statement     # AssignStatement
-    | if_statement         # IfStatement
-    | try_statement        # TryStatement
-    | module_statement     # ModuleStatement
-    | class_statement      # ClassStatement;
+    : empty_statement
+    | block_statement
+    | expression_statement
+    | assign_statement
+    | if_statement eos?
+    | try_statement eos?
+    | module_statement eos?
+    | class_statement eos?;
 /*====================================================================================================================*/
-block_statement: LL statement+? RL; //@Inline
-expr_block: block_statement | expression;
+block_statement: LL statement+? RL # BlockStatement;
+expr_or_block: block_statement | expression;
 /*====================================================================================================================*/
-empty_statement: eos; //@Inline
+empty_statement: eos # EmptyStatement;
 eos: Semicolon;
 symbol: Identifier (Dot Identifier)*;
 /*====================================================================================================================*/
 expression_statement
-    : expression (Comma expression)* eos?; //@Inline
+    : expression (Comma expression)* eos? # ExpressionStatement;
 type_statement
     : left = Identifier TypeAnnotation right = expression # TypeAssign
     | Type left = Identifier right = expression           # TypeAssign;
@@ -38,7 +38,7 @@ expression
     | left = expression op = mul_ops right = expression                 # MultiplyLike
     | left = expression op = add_ops right = expression                 # PlusLike
     | left = expression op = list_ops right = expression                # ListLike
-    | id = function_apply op = assign_lazy expr = assignable            # LazyAssign
+    | id = function_apply op = DelayedAssign expr = assignable          # LazyAssign
     | <assoc = right> id = assign_lhs op = assign_ops expr = assignable # OperatorAssign
     | data = listLiteral                                                # List
     | left = expression data = indexLiteral                             # Index
@@ -71,7 +71,7 @@ mul_ops
 list_ops: Concat | LeftShift | RightShift; //@Inline
 /*====================================================================================================================*/
 assign_statement
-    : op = assign_modifier id = assign_lhs expr = assignable eos?; //@Inline
+    : op = assign_modifier id = assign_lhs expr = assignable eos? # AssignStatement;
 assignable: (expression | block_statement);
 assign_lhs
     : Identifier LS Identifier RS                      # AssignFunction
@@ -86,19 +86,18 @@ assign_ops
     | MinusFrom
     | LetAssign
     | FinalAssign; //@Inline
-assign_lazy: DelayedAssign;
-assign_modifier: Let | Final;
+assign_modifier: Let | Final; //@Inline
 /*====================================================================================================================*/
 module_statement
-    : Using module = symbol module_controller? eos?           # ModuleInclude
-    | Using module = symbol As alias = Identifier eos?        # ModuleAlias
-    | Using source = symbol With name = Identifier eos?       # ModuleSymbol
-    | Using module = symbol LL expression_statement+? RL eos? # ModuleResolve;
-module_controller: Times | Power;
+    : Using module = symbol module_controller?           # ModuleInclude
+    | Using module = symbol As alias = Identifier        # ModuleAlias
+    | Using source = symbol With name = Identifier       # ModuleSymbol
+    | Using module = symbol LL expression_statement+? RL # ModuleResolve;
+module_controller: Times | Power; //@Inline
 /*====================================================================================================================*/
 class_statement
-    : Class id = Identifier class_implement? class_define eos?               # ClassBase
-    | Class id = Identifier class_fathers class_implement? class_define eos? # ClassWithFather;
+    : Class id = Identifier class_implement? class_define               # ClassBase
+    | Class id = Identifier class_fathers class_implement? class_define # ClassWithFather;
 class_fathers
     : Extend father = symbol          # ClassFather
     | LS father = symbol RS           # ClassFather
@@ -106,21 +105,23 @@ class_fathers
 class_implement: (Implement | Colon) symbol # ClassImplement;
 class_define: LL expression RL # ClassDefine;
 /*====================================================================================================================*/
-interfaceStatement: Interface expression eos;
+interface_Statement: Interface expression eos;
 /*====================================================================================================================*/
-templateStatement: Template expression eos;
+template_Statement: Template expression eos;
 /*====================================================================================================================*/
-macroStatement: Macro expression eos;
+macro_Statement: Macro expression eos;
 /*====================================================================================================================*/
 if_statement
-    : If condition (Else expr_block)? eos?        # SingleIf
-    | If condition elseif (Else expr_block)? eos? # NestedIf;
-condition: LS? expression expr_block RS? # ConditionStatement;
-elseif: (Else If condition)*;
+    : If condition_statement expr_or_block else_statement?            # IfSingle
+    | If condition_statement expr_or_block if_elseif* else_statement? # IfNested;
+if_elseif
+    : Else If condition_statement expr_or_block # ElseIfStatement;
+else_statement: Else expr_or_block # ElseStatement;
+condition_statement: LS? expression RS? # ConditionStatement;
 /*====================================================================================================================*/
 try_statement
     : Try block_statement finalProduction
-    | Try block_statement (catchProduction finalProduction?); //@Inline
+    | Try block_statement (catchProduction finalProduction?);
 catchProduction: Catch LS? symbol RS? block_statement;
 finalProduction: Final block_statement;
 //TODO: USE expr_block
