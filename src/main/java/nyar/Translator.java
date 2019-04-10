@@ -10,7 +10,16 @@ public class Translator extends NyarBaseVisitor<String> {
         return result.toString();
     }
 
+    public String visitStatement(NyarParser.StatementContext ctx) {
+        //System.out.print("Statement: " + ctx.getText() + "\n");
+        if (ctx.eos() != null) {
+            return this.visit(ctx.getChild(0)) + ";";
+        } else {
+            return this.visit(ctx.getChild(0));
+        }
+    }
 
+    /*
     public String visitBlockStatement(NyarParser.BlockStatementContext ctx) {
         StringBuilder result = new StringBuilder();
         //System.out.print("Expression: " + ctx.getText() + "\n");
@@ -20,6 +29,7 @@ public class Translator extends NyarBaseVisitor<String> {
         }
         return result.toString();
     }
+    */
 
 
     public String visitEmptyStatement(NyarParser.EmptyStatementContext ctx) {
@@ -57,7 +67,7 @@ public class Translator extends NyarBaseVisitor<String> {
                 return String.format("Plus[%s]", rhs);
             case NyarParser.Minus:
                 return String.format("Minus[%s]", rhs);
-            case NyarParser.Not:
+            case NyarParser.LogicNot:
                 return String.format("Not[%s]", rhs);
             default:
                 return String.format("UnknowOperator[%s]", rhs);
@@ -154,19 +164,27 @@ public class Translator extends NyarBaseVisitor<String> {
         }
     }
 
+    public String visitIfSingle(NyarParser.IfSingleContext ctx) {
+        String cond = this.visit(ctx.condition_statement());
+        String then = this.visit(ctx.expr_or_block());
+        if (ctx.else_statement() != null) {
+            //System.out.printf("IfElse: %s\n", ctx.getText());
+            String otherwise = this.visit(ctx.else_statement());
+            return String.format("Nyar`Core`If[%s,%s,%s]", cond, then, otherwise);
+        } else {
+            //System.out.printf("If: %s\n", ctx.getText());
+            return String.format("Nyar`Core`If[%s,%s]", cond, then);
+        }
+    }
 
-    public String visitSingleIf(NyarParser.SingleIfContext ctx) {
-        System.out.printf("IfStatement: %s", ctx.condition().getText());
+
+    public String visitIfNested(NyarParser.IfNestedContext ctx) {
+        System.out.printf("ElseIf: %s\n", ctx.getText());
         return visitChildren(ctx);
     }
 
 
-    public String visitNestedIf(NyarParser.NestedIfContext ctx) {
-        return visitChildren(ctx);
-    }
-
-
-    /*
+/*
     public String visitIfStatement(NyarParser.IfStatementContext ctx) {
         int else_count = ctx.elseif().Else().size();
         int then_count = 0;
