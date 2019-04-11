@@ -18,7 +18,7 @@ LQuote : '\u201C'; //U+2018 ‘ U+201C “
 RQuote : '\u201D'; //U+2019 ’ U+201D ”
 
 // Angle Brackets
-Import          : '<<<' | '\u22D8'; //U+22D8 
+Import          : '<<<' | '\u22D8'; //U+22D8 ⋘
 LeftShift       : '<<' | '\u226A'; //U+226A ≪
 LessEqual       : '<=';
 Less            : '<';
@@ -29,6 +29,7 @@ Grater          : '>';
 Increase        : '++';
 PlusTo          : '+=';
 Plus            : '+';
+LogicXor        : '\u2295'; //U+2295 ⊕
 Decrease        : '--';
 MinusFrom       : '-=';
 To              : '->' | '\u2192'; //U+2192 →
@@ -48,16 +49,17 @@ Power           : '^';
 Surd            : '\u221A'; //U+221A √
 Equivalent      : '===';
 NotEquivalent   : '=!=';
-Equal           : '==';
+Equal           : '=='; //≡
 Infer           : '=>' | '\u27F9'; //U+27F9 ⟹
 Assign          : '=';
-LogicOr         : '||' | '\u2016'; //U+2016 ‖
-Or              : '|'; // ∧(2227) & && ∨(2228) ∩(2229) ∪(222A)
-LogicAnd        : '&&';
-And             : '&';
+LogicOr         : '||' | '\u2227'; //U+2227 ∧
+BitOr           : '|';
+LogicAnd        : '&&' | '\u2228'; //U+2228 ∨
+BitAnd          : '&';
+DoubleBang      : '!!';
 NotEqual        : '!=' | '\u2260'; //U+2260 ≠
-LogicNot        : '!' | '\uFF01'; //U+FF01 ！
-Not             : '\u00AC'; //U+00AC ¬
+BitNot          : '!' | '\uFF01'; //U+FF01 ！
+LogicNot        : DoubleBang | '\u00AC'; //U+00AC ¬
 Shebang         : '#!';
 PostfixFunction : '$';
 Curry           : '@@@';
@@ -70,11 +72,13 @@ Colon           : ':' | '\uFF1A'; //U+FF1A ：
 Semicolon       : ';' | '\uFF1B'; //U+FF1B ；
 Quote           : '`';
 Acute           : '\u00B4'; // U+00B4 ´
-Ellipsis        : '...';
-FinalAssign     : '.=';
+DoubleQuotation : '"';
+Quotation       : '\'';
+Underline       : '_';
+Ellipsis        : '...'; //…
+FinalAssign     : '.=' | '\u2250'; //U+2250 ≐
 Dot             : '.' | '\u3002'; //U+3002 。
 Comma           : ',' | '\uFF0C'; //U+FF0C ，
-Quotation       : '\'';
 Map             : '/@';
 MapAll          : '//@';
 Concat          : '~~';
@@ -86,3 +90,5 @@ TensorProduct   : '\u2299'; //U+2299 ⊙
 Section         : '\u00A7'; //U+00A7 §
 Pilcrow         : '\u00B6'; //U+00B6 ¶
 Currency        : '\u00A4'; //U+00A4 ¤
+Element         : '\u2208'; //U+2208 ∈
+Reciprocal      : '\u215F'; //U+215F ⅟

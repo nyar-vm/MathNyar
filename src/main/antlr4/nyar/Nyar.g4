@@ -19,6 +19,7 @@ expr_or_block: (block_statement | expression);
 empty_statement: eos # EmptyStatement;
 eos: Semicolon;
 symbol: Identifier (Dot Identifier)*;
+global: Section (Dot Identifier)+;
 /*====================================================================================================================*/
 expression_statement
     : expression (Comma expression)* # ExpressionStatement;
@@ -33,7 +34,8 @@ expression
     | function_apply                                                    # FunctionApply
     | op = pre_ops right = expression                                   # PrefixExpression
     | left = expression op = bit_ops right = expression                 # BinaryLike
-    | left = expression op = logic_ops right = expression               # LogicLike
+    | left = expression op = cpr_ops right = expression                 # LogicLike
+    | left = expression op = cpr_ops right = expression                 # CompareLike
     | <assoc = right> left = expression op = pow_ops right = expression # PowerLike
     | left = expression op = mul_ops right = expression                 # MultiplyLike
     | left = expression op = add_ops right = expression                 # PlusLike
@@ -48,9 +50,10 @@ expression
     | atom = symbol                                                     # SymbolExpression
     | LS expression RS                                                  # PriorityExpression;
 add_ops: Plus | Minus; //@Inline
-pre_ops: Plus | Minus | Not | LogicNot; //@Inline
+pre_ops: Plus | Minus | BitNot | LogicNot | Reciprocal; //@Inline
 bit_ops: LeftShift | RightShift; //@Inline
-logic_ops
+lgk_ops: LogicAnd | LogicNot | LogicOr | LogicXor; //@Inline
+cpr_ops
     : Equal
     | NotEqual
     | Equivalent
@@ -139,5 +142,5 @@ signedInteger : (Plus | Minus)? Integer;
 /*====================================================================================================================*/
 LineComment : Shebang ~[\r\n]* -> channel(HIDDEN);
 PartComment : Comment .*? Comment -> channel(HIDDEN);
-WhiteSpace  : [\t\r\n \u000C]+ -> skip;
+WhiteSpace  : UnicodeWhiteSpace+ -> skip;
 NewLine     : ('\r'? '\n' | '\r')+ -> skip;

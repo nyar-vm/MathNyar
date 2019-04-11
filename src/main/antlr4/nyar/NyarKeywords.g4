@@ -1,22 +1,35 @@
 lexer grammar NyarKeywords;
+import NyarOperators;
 // $antlr-format useTab false; reflowComments false;
 // $antlr-format alignColons trailing;
-
-fragment Digit              : [0-9];
-fragment OctalDigit         : [0-7];
-fragment HexDigit           : [0-9a-fA-F];
-fragment Letter             : [a-zA-Z];
-fragment Unicode_WhiteSpace : [\p{White_Space}];
-fragment SimpleString       : '"' .*? '"';
-fragment EmojiCharacter     : [\p{Emoji}];
-fragment NameStartCharacter : Letter | '_';
-fragment NameCharacter      : NameStartCharacter | Digit;
+/* 
+ UCP: Unicode Character Property 
+ See :http://www.unicode.org/Public/UNIDATA/Scripts.txt
+ */
+fragment Digit             : [0-9];
+fragment OctalDigit        : [0-7];
+fragment HexDigit          : [0-9a-fA-F];
+fragment Letter            : [a-zA-Z];
+fragment UnicodeWhiteSpace : [\p{White_Space}];
+fragment SimpleString      : DoubleQuotation .*? DoubleQuotation;
+fragment EmojiCharacter    : [\p{Emoji}];
+fragment NameStartCharacter: (
+        Underline
+        | [\p{Latin}]
+        | [\p{Han}]
+        | [\p{Hiragana}]
+        | [\p{Katakana}]
+        | [\p{Greek}]
+    );
+fragment NameCharacter : NameStartCharacter | Digit;
 
 /* Module */
 Using  : 'using';
 Expose : 'expose';
-With   : 'with';
 As     : 'as';
+
+/* Scope */
+With : 'with';
 
 /* Macro */
 Macro : 'macro';
@@ -26,41 +39,46 @@ Template : 'template';
 
 /* Class */
 Interface : 'interface';
+Enumerate : 'enumerate';
+Structure : 'structure';
 Class     : 'class';
-Extend   : 'extend';
+Extend    : 'extend';
 Implement : 'implement';
 
 /* Access Control */
-Setter    : 'setter';
-Getter    : 'getter';
-Public    : 'public';
-Private   : 'private';
-Protected : 'protected';
-Final     : 'final';
+Setter  : 'setter';
+Getter  : 'getter';
+Public  : 'public';
+Private : 'private';
+Protect : 'protect';
+Final   : 'final';
 
 /* Function */
-Let   : 'let';
-Type: 'type';
+Let  : 'let';
+Type : 'type';
 
 /* Condition */
-If   : 'if';
-Else : 'else';
+If     : 'if';
+Else   : 'else';
+Match  : 'match';
+Switch : 'switch';
+Case   : 'case';
 
 /* Loop */
-Try   : 'try';
-Catch : 'catch';
 For   : 'for';
 In    : 'in';
+Try   : 'try';
+Catch : 'catch';
 
 /* Constant */
 True  : 'true';
 False : 'false';
 
-BOOL        : True | False;
-STRING      : SimpleString;
-Identifier  : NameStartCharacter NameCharacter*; //Try JS | Julia
-NUMBER      : Integer | Float;
-Float       : Digit+ '.' Digit* | '.' Digit+;
-Integer     : Digit+;
+BOOL       : True | False;
+STRING     : SimpleString;
+Identifier : NameStartCharacter NameCharacter*;
+NUMBER     : Integer | Float;
+Float      : Digit+ Dot Digit* | Dot Digit+;
+Integer    : Digit+;
 //UNICODE_ID : [\p{General_Category=Other_Letter}]*; May Allow # $ % with special meaning English +
 // Chinese + Japanese + Greeks
