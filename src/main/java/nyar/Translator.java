@@ -21,12 +21,12 @@ public class Translator extends NyarBaseVisitor<String> {
 
 
     public String visitBlockStatement(NyarParser.BlockStatementContext ctx) {
-        String result = "";
+        StringBuilder result = new StringBuilder();
         //System.out.print("Block: " + ctx.getText() + "\n");
         for (int i = 0; i < ctx.statement().size(); i++) {
-            result += this.visitStatement(ctx.statement(i));
+            result.append(this.visitStatement(ctx.statement(i)));
         }
-        return result;
+        return result.toString();
     }
 
 
@@ -90,6 +90,7 @@ public class Translator extends NyarBaseVisitor<String> {
                 return String.format("UnknowOperator[%s,%s]", lhs, rhs);
         }
     }
+
 
     public String visitMultiplyLike(NyarParser.MultiplyLikeContext ctx) {
         String lhs = this.visit(ctx.left);

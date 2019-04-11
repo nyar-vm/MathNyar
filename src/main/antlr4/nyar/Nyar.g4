@@ -18,21 +18,23 @@ expr_or_block: (block_statement | expression);
 /*====================================================================================================================*/
 empty_statement: eos # EmptyStatement;
 eos: Semicolon;
-symbol: Identifier (Dot Identifier)*;
-global: Section (Dot Identifier)+;
+symbol: Identifier (DOT Identifier)*;
+global: Section (DOT Identifier)+;
 /*====================================================================================================================*/
 expression_statement
-    : expression (Comma expression)* # ExpressionStatement;
+    : expression (COMMA expression)* # ExpressionStatement;
 type_statement
     : left = Identifier TypeAnnotation right = expression # TypeAssign
     | Type left = Identifier right = expression           # TypeAssign;
 function_apply: symbol LS function_params? RS;
-function_params: expression (Comma expression)*;
+function_params: expression (COMMA expression)*;
 // High computing priority in the front
 expression
     : type_statement                                                    # TypeStatement
     | function_apply                                                    # FunctionApply
     | op = pre_ops right = expression                                   # PrefixExpression
+    | left = expression op = pst_ops                                    # PostfixExpression
+    | left = expression op = DOT right = expression                     # MethodApply
     | left = expression op = bit_ops right = expression                 # BinaryLike
     | left = expression op = cpr_ops right = expression                 # LogicLike
     | left = expression op = cpr_ops right = expression                 # CompareLike
@@ -50,7 +52,14 @@ expression
     | atom = symbol                                                     # SymbolExpression
     | LS expression RS                                                  # PriorityExpression;
 add_ops: Plus | Minus; //@Inline
-pre_ops: Plus | Minus | BitNot | LogicNot | Reciprocal; //@Inline
+pre_ops
+    : Plus
+    | Minus
+    | BitNot
+    | LogicNot
+    | Reciprocal
+    | Increase; //@Inline
+pst_ops: Increase;
 bit_ops: LeftShift | RightShift; //@Inline
 lgk_ops: LogicAnd | LogicNot | LogicOr | LogicXor; //@Inline
 cpr_ops
@@ -79,8 +88,8 @@ assignable: (expression | block_statement);
 assign_lhs
     : Identifier LS Identifier RS                      # AssignFunction
     | Identifier                                       # AssignValue
-    | Identifier (Dot Identifier)+                     # AssignAttribute
-    | LS (assign_pass (Comma assign_pass)*)? Comma? RS # AssignWithTuple
+    | Identifier (DOT Identifier)+                     # AssignAttribute
+    | LS (assign_pass (COMMA assign_pass)*)? COMMA? RS # AssignPair
     | Identifier LM Integer RM                         # AssignWithList;
 assign_pass: Tilde | symbol;
 assign_ops
@@ -104,7 +113,7 @@ class_statement
 class_fathers
     : Extend father = symbol          # ClassFather
     | LS father = symbol RS           # ClassFather
-    | LS (symbol (Comma symbol)+)? RS # ClassFathers;
+    | LS (symbol (COMMA symbol)+)? RS # ClassFathers;
 class_implement: (Implement | Colon) symbol # ClassImplement;
 class_define: LL expression RL # ClassDefine;
 /*====================================================================================================================*/
@@ -130,12 +139,12 @@ finalProduction: Final block_statement;
 //TODO: USE expr_block
 /*====================================================================================================================*/
 // $antlr-format alignColons trailing;
-dictLiteral   : LL (keyvalue (Comma keyvalue)*)? Comma? RL;
+dictLiteral   : LL (keyvalue (COMMA keyvalue)*)? COMMA? RL;
 keyvalue      : key = key_valid Colon value = element;
 key_valid     : (NUMBER | STRING | symbol);
-listLiteral   : LM (element (Comma? element)*)? Comma? RM;
+listLiteral   : LM (element (COMMA? element)*)? COMMA? RM;
 element       : (expression | dictLiteral | listLiteral);
-indexLiteral  : LM index_valid (Comma? index_valid)+? RM;
+indexLiteral  : LM index_valid (COMMA? index_valid)+? RM;
 index_valid   : (symbol | Integer) Colon?;
 signedInteger : (Plus | Minus)? Integer;
 //FIXME: replace NUMBER with signedInteger
