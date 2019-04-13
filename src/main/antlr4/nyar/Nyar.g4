@@ -15,7 +15,8 @@ statement
     | loop_statement eos?;
 /*====================================================================================================================*/
 block_statement: LL statement+? RL # BlockStatement;
-expr_or_block: (block_statement | expression);
+end_statement:  Colon? statement+ End # EndStatement;
+expr_or_block: (block_statement | end_statement | Do? expression);
 /*====================================================================================================================*/
 empty_statement: eos # EmptyStatement;
 eos: Semicolon;
@@ -147,10 +148,10 @@ finalProduction: Final block_statement;
 //TODO: USE expr_block
 /*====================================================================================================================*/
 loop_statement
-    : For LS for_inline1 RS expr_or_block                   # ForLoop
-    | For Identifier In expression expr_or_block            # ForInLoop
-    | While condition_statement (Do | Colon)? expr_or_block # WhileLoop
-    | Do expr_or_block                                      # DoLoop;
+    : For LS for_inline1 RS expr_or_block        # ForLoop
+    | For Identifier In expression expr_or_block # ForInLoop
+    | While condition_statement expr_or_block    # WhileLoop
+    | Do expr_or_block                           # DoLoop;
 for_inline1
     : initial = expression COMMA condition = expression COMMA increment = expression; //@Inline
 /*====================================================================================================================*/

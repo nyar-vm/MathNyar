@@ -109,8 +109,8 @@ Reciprocal : '\u215F'; //U+215F ⅟
 
 /* Postfix */
 Degree    : '\u00B0'; //U+00B0 °
-Transpose : '\u1D40'; // U+1D40 ᵀ 
-Hermitian : '\u1D34'; // U+1D34 ᴴ
+Transpose : '\u1D40'; //U+1D40 ᵀ
+Hermitian : '\u1D34'; //U+1D34 ᴴ
 
 /* TypeLiteral */
 FieldComplex  : '\u2102'; //U+2102 ℂ
