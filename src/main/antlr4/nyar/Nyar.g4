@@ -5,13 +5,14 @@ import NyarKeywords, NyarOperators;
 program: statement* EOF;
 statement
     : empty_statement
-    | block_statement
+    | block_statement eos?
     | expression_statement eos?
-    | assign_statement
-    | if_statement eos?
+    | assign_statement eos?
+    | branch_statement eos?
     | try_statement eos?
     | module_statement eos?
-    | class_statement eos?;
+    | class_statement eos?
+    | loop_statement eos?;
 /*====================================================================================================================*/
 block_statement: LL statement+? RL # BlockStatement;
 expr_or_block: (block_statement | expression);
@@ -83,12 +84,12 @@ mul_ops
 list_ops: Concat | LeftShift | RightShift; //@Inline
 /*====================================================================================================================*/
 assign_statement
-    : op = assign_modifier id = assign_lhs expr = assignable eos? # AssignStatement;
+    : op = assign_modifier id = assign_lhs expr = assignable # AssignStatement;
 assignable: (expression | block_statement);
 assign_lhs
-    : Identifier LS Identifier RS                      # AssignFunction
-    | Identifier                                       # AssignValue
+    : Identifier                                       # AssignValue
     | Identifier (DOT Identifier)+                     # AssignAttribute
+    | Identifier LS Identifier RS                      # AssignFunction
     | LS (assign_pass (COMMA assign_pass)*)? COMMA? RS # AssignPair
     | Identifier LM Integer RM                         # AssignWithList;
 assign_pass: Tilde | symbol;
@@ -101,11 +102,14 @@ assign_ops
 assign_modifier: Let | Final; //@Inline
 /*====================================================================================================================*/
 module_statement
-    : Using module = symbol module_controller?           # ModuleInclude
-    | Using module = symbol As alias = Identifier        # ModuleAlias
-    | Using source = symbol With name = Identifier       # ModuleSymbol
-    | Using module = symbol LL expression_statement+? RL # ModuleResolve;
+    : Using module = symbol module_controller?      # ModuleInclude
+    | Using module = symbol As alias = Identifier   # ModuleAlias
+    | Using source = symbol With? name = Identifier # ModuleSymbol
+    | Using source = symbol With? id_tuples         # ModuleSymbols
+    | Using dictLiteral                             # ModuleResolve;
+id_tuples: LL Identifier (COMMA Identifier)* RL;
 module_controller: Times | Power; //@Inline
+//TODO: Support Nested Using Statement
 /*====================================================================================================================*/
 class_statement
     : Class id = Identifier class_implement? class_define               # ClassBase
@@ -123,13 +127,17 @@ template_Statement: Template expression eos;
 /*====================================================================================================================*/
 macro_Statement: Macro expression eos;
 /*====================================================================================================================*/
-if_statement
-    : If condition_statement expr_or_block else_statement?            # IfSingle
-    | If condition_statement expr_or_block if_elseif* else_statement? # IfNested;
-if_elseif
-    : Else If condition_statement expr_or_block # ElseIfStatement;
-else_statement: Else expr_or_block # ElseStatement;
+
+/*====================================================================================================================*/
+branch_statement
+    : If condition_statement Then? expr_or_block if_else?            # IfSingle
+    | If condition_statement Then? expr_or_block if_elseif* if_else? # IfNested
+    | Switch condition_statement expr_or_block                       # SwitchStatement
+    | Match condition_statement expr_or_block                        # MatchStatement;
 condition_statement: LS? expression RS? # ConditionStatement;
+if_else: Else expr_or_block # ElseStatement;
+if_elseif
+    : Else If condition_statement Then? expr_or_block # ElseIfStatement;
 /*====================================================================================================================*/
 try_statement
     : Try block_statement finalProduction
@@ -137,6 +145,14 @@ try_statement
 catchProduction: Catch LS? symbol RS? block_statement;
 finalProduction: Final block_statement;
 //TODO: USE expr_block
+/*====================================================================================================================*/
+loop_statement
+    : For LS for_inline1 RS expr_or_block                   # ForLoop
+    | For Identifier In expression expr_or_block            # ForInLoop
+    | While condition_statement (Do | Colon)? expr_or_block # WhileLoop
+    | Do expr_or_block                                      # DoLoop;
+for_inline1
+    : initial = expression COMMA condition = expression COMMA increment = expression; //@Inline
 /*====================================================================================================================*/
 // $antlr-format alignColons trailing;
 dictLiteral   : LL (keyvalue (COMMA keyvalue)*)? COMMA? RL;

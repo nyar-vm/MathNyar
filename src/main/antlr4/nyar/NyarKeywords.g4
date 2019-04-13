@@ -33,6 +33,7 @@ With : 'with';
 
 /* Macro */
 Macro : 'macro';
+End: 'end';
 
 /* Template */
 Template : 'template';
@@ -59,6 +60,7 @@ Type : 'type';
 
 /* Condition */
 If     : 'if';
+Then   : 'then';
 Else   : 'else';
 Match  : 'match';
 Switch : 'switch';
@@ -69,6 +71,8 @@ For   : 'for';
 In    : 'in';
 Try   : 'try';
 Catch : 'catch';
+While : 'while';
+Do    : 'do';
 
 /* Constant */
 True  : 'true';
