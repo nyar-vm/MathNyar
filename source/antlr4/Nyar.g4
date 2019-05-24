@@ -1,5 +1,5 @@
 grammar Nyar;
-// $antlr-format columnLimit 120;
+// $antlr-format columnLimit 128;
 // $antlr-format useTab false ;reflowComments false;
 // $antlr-format alignColons hanging;
 program: statement* EOF;
@@ -14,13 +14,12 @@ statement
     | traitStatement eos?
     | classStatement eos?
     | expression eos?
-    | data eos?
-    |comment;
+    | data eos?;
 /*====================================================================================================================*/
 // $antlr-format alignColons trailing;
-emptyStatement : eos|Separate;
+emptyStatement : eos | Separate;
 eos            : Semicolon;
-Separate: ';;';
+Separate       : ';;';
 Semicolon      : ';' | '\uFF1B'; //U+FF1B ；
 /*====================================================================================================================*/
 // $antlr-format alignColons hanging;
@@ -30,7 +29,7 @@ importStatement
     | Using source = moduleName With? name = Identifier # ModuleSymbol
     | Using source = moduleName With? idTuples          # ModuleSymbols
     | Using source = moduleName Dot idTuples            # ModuleSymbols
-    | Using dict                                 # ModuleResolve;
+    | Using dict                                        # ModuleResolve;
 moduleName: symbol | symbol (Dot symbol);
 // $antlr-format alignColons trailing;
 idTuples         : '{' Identifier (Comma Identifier)* '}';
@@ -38,16 +37,12 @@ importController : Times | Power;
 As               : 'as';
 With             : 'with';
 Using            : 'using';
-Expose           : 'expose';
 Instance         : 'instance';
 Times            : '*';
 Power            : '^';
 /*====================================================================================================================*/
 // $antlr-format alignColons hanging;
-blockStatement
-    : '{' expression* '}'
-    | Colon expression* End
-    | Colon expression;
+blockStatement: '{' expression* '}' | Colon expression* End | Colon expression;
 // $antlr-format alignColons trailing;
 End   : 'end';
 Colon : ':' | '\uFF1A'; //U+FF1A ：
@@ -60,7 +55,8 @@ expression
     : functionCall                                                      # FunctionApply
     | left = expression Dot right = symbol                              # GetterApply
     | left = expression Dot right = functionCall                        # MethodApply
-    | left = expression right = index                            # IndexApply
+    | left = expression right = index                                   # IndexApply
+    | assignStatment                                                    # AssignApply
     | left = identifier right = string                                  # SpecialString
     | left = expression As right = typeExpression                       # TypeConversion
     | op = pre_ops right = expression                                   # PrefixExpression
@@ -69,18 +65,18 @@ expression
     | left = expression op = lgk_ops right = expression                 # LogicLike
     | left = expression op = cpr_ops right = expression                 # CompareLike
     | <assoc = right> left = expression op = pow_ops right = expression # PowerLike
+    | left = expression op = mul_ops right = expression                 # MultiplyLike
     | left = expression op = add_ops right = expression                 # PlusLike
     | left = expression op = list_ops right = expression                # ListLike
     | atom = data                                                       # DataLiteral
-    | left = number right = expression                                  # SpaceExpression
     | '(' expression ')'                                                # PriorityExpression
     | controller                                                        # ControlExpression
-;
-//  | left = expression op = mul_ops right = expression                 # MultiplyLike
+    | f = expression BitAnd                                             # SlotCatch;
+//  | left = number right = expression                                  # SpaceExpression
 /*====================================================================================================================*/
 // $antlr-format alignColons trailing;
 functionCall : symbols? last = symbol '(' (arguments (Comma arguments)*)? ')';
-controller   : Return expressionStatement | Pass;
+controller   : Return expressionStatement | Pass | Break;
 Pass         : 'pass';
 Return       : 'return';
 Break        : 'break';
@@ -113,20 +109,29 @@ Nullable  : '?';
 KeyValues : '**';
 /*====================================================================================================================*/
 // $antlr-format alignColons hanging;
-assignStatment: assignValue | assignVariable | assignDefer | assignDefinition;
-assignValue: Val assignLHS assignRHS | assignLHS Set assignRHS;
-assignVariable: Var assignLHS assignRHS;
-assignDefer: Def assignLHS assignRHS | assignLHS Delay assignRHS;
-assignDefinition
-    : Def symbol '(' parameter (Comma parameter)* ')' typeSuffix? assignRHS
-    | symbol '(' parameter (Comma parameter)* ')' typeSuffix? Set assignRHS;
+assignStatment
+    : Val assignLHS assignRHS                                               # AssignValue
+    | Var assignLHS assignRHS                                               # AssignVariable
+    | Def assignLHS assignRHS                                               # AssignDefer
+    | Def symbol '(' parameter (Comma parameter)* ')' typeSuffix? assignRHS # AssignFunction
+    | symbol '(' parameter (Comma parameter)* ')' typeSuffix? Set assignRHS # AssignFunction
+    | assignLHS Set assignRHS                                               # AssignValue
+    | assignLHS Vable assignRHS                                             # AssignVariable
+    | assignLHS Delay assignRHS                                             # AssignDefer;
 assignLHS
     : symbol typeSuffix?                       # AssignSingleSymbol
     | maybeSymbol (Comma maybeSymbol)*         # AssignTupleSymbol
     | '(' maybeSymbol (Comma maybeSymbol)* ')' # AssignTupleSymbol
     | symbols                                  # AssignMaybeSetter
-    | symbols index                     # AssignMaybeIndex;
-assignRHS: data | blockStatement | expressionStatement;
+    | symbols index                            # AssignMaybeIndex;
+assignRHS
+    : expression
+    | data
+    | '{' expression* '}'
+    | Colon expression* End
+    | Colon expression
+    | expressionStatement
+    | statement;
 maybeSymbol: symbol typeSuffix? # AssignTupleOne | Tilde # AssignTupleShadow;
 symbols: (symbol | symbolName) (Dot symbol)*;
 symbolName: symbol (Name symbol)*;
@@ -136,30 +141,23 @@ Var   : 'var';
 Let   : 'let';
 Def   : 'def';
 Set   : '=';
+Vable : '.=' | '\u2250'; //U+2250 ≐
 Name  : '::' | '\u2237'; //U+2237 ∷
 Delay : ':=' | '\u2254'; //U+2254 ≔
 /*====================================================================================================================*/
-// $antlr-format alignColons hanging;
-data
-    : (number
-    | string
-    | special
-    | symbols)
-    | (list | matrix
-    | dict | index);
-number: complex | exponent | decimal | integer | Binary | Octal | Hexadecimal;
-// $antlr-format alignColons trailing;
-dict  : '{' (keyValue (Comma keyValue)*)? Comma? '}';
-keyValue     : key = keyValid Colon value = element;
-keyValid     : integer | symbol|string;
-list  :  '[' listLine? Comma? ']';
-listLine     : element (Comma? element)*;
-element      : expression | dict | list|blockStatement;
-matrix       :  '[' listLine (eos listLine)* eos? ']';
-index :   '[' indexValid (Comma? indexValid)* ']';
-indexValid   : (symbol | integer) Colon?;
-Plus         : '+';
-Minus        : '-';
+data       : number | string | special | symbols | list | matrix | dict | index | solt;
+number     : complex | exponent | decimal | integer | Binary | Octal | Hexadecimal;
+dict       : '{' (keyValue (Comma keyValue)*)? Comma? '}';
+keyValue   : key = keyValid Colon value = element;
+keyValid   : integer | symbol | string;
+list       : '[' listLine? Comma? ']';
+listLine   : element (Comma? element)*;
+element    : data | expression | blockStatement;
+matrix     : '[' listLine (eos listLine)* eos? ']';
+index      : '[' indexValid (Comma? indexValid)* ']';
+indexValid : (symbol | integer) Colon?;
+Plus       : '+';
+Minus      : '-';
 /*====================================================================================================================*/
 // $antlr-format alignColons hanging;
 branchStatement
@@ -182,9 +180,7 @@ Match  : 'match';
 tryStatement
     : Try blockStatement finalProduction
     | Try blockStatement (catchProduction finalProduction?);
-catchProduction
-    : Catch symbol blockStatement
-    | Catch '(' symbol ')' blockStatement;
+catchProduction: Catch symbol blockStatement | Catch '(' symbol ')' blockStatement;
 finalProduction: Final blockStatement;
 // $antlr-format alignColons trailing;
 Try   : 'try';
@@ -205,13 +201,10 @@ While : 'while';
 Do    : 'do';
 /*====================================================================================================================*/
 // $antlr-format alignColons hanging;
-traitStatement: Expose? Trait symbol classExtends? classMeets? classBody;
-classStatement: Expose? Class symbol classExtends? classMeets? classBody;
+traitStatement: Trait symbol classExtends? classMeets? classBody;
+classStatement: Class symbol classExtends? classMeets? classBody;
 classExtends: Extends symbol+ | '(' symbol (Comma symbol)* ')';
-classMeets
-    : Meets symbol+
-    | Tilde symbol
-    | Tilde '(' symbol (Comma symbol)* ')';
+classMeets: Meets symbol+ | Tilde symbol | Tilde '(' symbol (Comma symbol)* ')';
 classBody
     : '{' classExpression* '}'
     | Colon classExpression* End
@@ -240,8 +233,9 @@ exponent
     | (decimal | integer) Exponent (decimal | integer) # DecimalExponent;
 // $antlr-format alignColons trailing;
 /* TODO:特殊进制输入*/
-decimal          : integer Dot integer? | Dot integer;
+decimal          : Decimal;
 integer          : Integer;
+Decimal          : Integer Dot Digit* | Dot Digit+;
 Binary           : BinHead Bin+;
 Octal            : OcHead Oct+;
 Hexadecimal      : HexHead Hex+;
@@ -265,23 +259,23 @@ string
 StringEscapeBlock   : S6 CharLevel1+? S6;
 StringEscapeSingle  : S2 CharLevel2+? S2;
 StringEmpty         : S6 S6 | S2 S2;
-Escape : '\\';
+Escape              : '\\';
 fragment S6         : '"""';
 fragment S2         : '"';
-fragment CharLevel1 : Escape (["\\/0bfnrt] | UTF8 | UTF16) | ~[\\];
-fragment CharLevel2 :Escape (["\\/0bfnrt] | UTF8 | UTF16) | ~["\\];
-fragment UTF8       : 'u' Hex Hex Hex Hex;
-fragment UTF16      : 'U' Hex Hex Hex Hex Hex Hex Hex Hex;
+fragment CharLevel1 : Escape . | ~[\\];
+fragment CharLevel2 : Escape . | ~["\\];
 /*====================================================================================================================*/
-special: True | False | Null | Nothing;
+special                 : True | False | Null | Nothing;
+identifier              : 'i' | 'j' | 'k' | Val | Var | Def | Let | Identifier | Integer;
+symbol                  : 'i' | 'j' | 'k' | Symbol | Identifier;
+solt                    : Sharp n = Integer? | Sharp id = Identifier;
 True                    : 'true';
 False                   : 'false';
 Null                    : 'null';
 Nothing                 : 'nothing';
-identifier              : Val | Var | Def | Let | Identifier | Integer;
 Identifier              : Letter+;
-symbol                  : Symbol | Identifier;
 Symbol                  : NameStartCharacter NameCharacter*;
+Sharp                   : '#';
 Dot                     : '.';
 Underline               : '_';
 fragment Letter         : [a-zA-Z];
@@ -297,11 +291,10 @@ fragment NameStartCharacter
 fragment NameCharacter: NameStartCharacter | Digit;
 /*====================================================================================================================*/
 // $antlr-format alignColons trailing;
-comment: LineComment|PartComment;
 Shebang            : '#!' -> channel(HIDDEN);
 Comment            : '%%%';
-LineComment        : Shebang ~[\r\n]* ;
-PartComment        : Comment .*? Comment ;
+LineComment        : Shebang ~[\r\n]+ -> channel(HIDDEN);
+PartComment        : Comment .*? Comment -> channel(HIDDEN);
 NewLine            : ('\r'? '\n' | '\r')+ -> skip;
 WhiteSpace         : UnicodeWS+ -> skip;
 fragment UnicodeWS : [\p{White_Space}];
@@ -309,7 +302,7 @@ fragment UnicodeWS : [\p{White_Space}];
 // $antlr-format alignColons hanging;
 add_ops: Plus | Minus;
 pre_ops: Plus | Minus | BitNot | LogicNot | Reciprocal | Increase;
-pst_ops: Increase | BitNot | DoubleBang;
+pst_ops: Increase | BitNot | DoubleBang | Decrease;
 bit_ops: LeftShift | RightShift;
 lgk_ops: LogicAnd | LogicNot | LogicOr | LogicXor;
 cpr_ops
@@ -318,7 +311,7 @@ cpr_ops
     | (LogicAnd | LogicOr);
 pow_ops: Power | Surd;
 mul_ops: Divide | Times | Multiply | Kronecker | TensorProduct;
-list_ops: Concat | LeftShift | RightShift;
+list_ops: Concat | LeftShift | RightShift | Increase;
 // $antlr-format alignColons trailing;
 /* <> */
 Import      : '<<<' | '\u22D8'; //U+22D8 ⋘
@@ -371,12 +364,11 @@ Apply           : '@@';
 LetAssign       : '@=';
 At              : '@';
 /* upper lower*/
-Quote       : '`';
-Acute       : '\u00B4'; // U+00B4 ´
-Quotation   : '\'';
-Ellipsis    : '...'; //…
-FinalAssign : '.=' | '\u2250'; //U+2250 ≐
-DOT         : '\u22C5'; //U+22C5 ⋅
+Quote     : '`';
+Acute     : '\u00B4'; // U+00B4 ´
+Quotation : '\'';
+Ellipsis  : '...'; //…
+DOT       : '\u22C5'; //U+22C5 ⋅
 /* Prefix */
 Reciprocal : '\u215F'; //U+215F ⅟
 /* Postfix */

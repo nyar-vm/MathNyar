@@ -1,5 +1,7 @@
 package nyar
 
+import java.util
+
 import scala.collection.JavaConverters._
 
 class Translator extends NyarBaseVisitor[String] {
@@ -36,7 +38,25 @@ class Translator extends NyarBaseVisitor[String] {
 		}
 	}
 
-	override def visitMatrix(ctx: NyarParser.MatrixContext): String = s"""(*  ParserError: \n${ctx.getText.replaceAll("(?m)^", "    ")}\n*)"""
+	override def visitMatrix(ctx: NyarParser.MatrixContext): String = {
+		def getLine(line: NyarParser.ListLineContext): String = {
+			val list = line.element().asScala.map(this.visit)
+			if (line.getText.length < 120) {
+				'{' + list.mkString(", ") + '}'
+			}
+			else {
+				s"""{\n${list.mkString(",").replaceAll("(?m)^", "    ")}\n}"""
+			}
+		}
+
+		val lines = ctx.listLine().asScala.map(getLine)
+		if (ctx.getText.length < 120) {
+			'{' + lines.mkString(", ") + '}'
+		}
+		else {
+			s"""{\n${lines.mkString(",\n").replaceAll("(?m)^", "    ")}\n}"""
+		}
+	}
 
 	override def visitIndex(ctx: NyarParser.IndexContext): String = s"""(*  ParserError: \n${ctx.getText.replaceAll("(?m)^", "    ")}\n*)"""
 
@@ -68,7 +88,6 @@ class Translator extends NyarBaseVisitor[String] {
 		case "false" => "False"
 		case "null" => "Null"
 		case "nothing" => "Nothing"
-		case _ => s"""(*  ParserError: \n${ctx.getText.replaceAll("(?m)^", "    ")}\n*)"""
 	}
 
 	override def visitEmptyStatement(ctx: NyarParser.EmptyStatementContext): String = ""
