@@ -1,6 +1,70 @@
+#! Unit 类型
+
+
+#! Integer 类型
+%%% Nyar 是不考虑空格和换行的, 如果不加 ;; 分隔会被解释成一整个表达式 %%%
+;; 0
+;; +0
+;; -0
+;; -127
+;; 65536
+;; -2147483648
+;; 9223372036854775808
+
+
+#! decimal
+%%% Decimal 类型 %%%
+;; 0.0
+;; 0.
+;; .0
+;; 3210.0123
+;; 3210.
+;; .0123
+
+#! exponent
+2*^2
+
+
+#!
+0b0 #! integer
+0o0 #! integer
+0x0 #! integer
+
+#!
+
+#! Boolean 类型
+true
+false
+
+
+#! Null 类型
+
+null
+
+
+%%% type Null: Optional(Nothing) %%%
+
+#! Nothing 类型
+nothing
+
+#!
+
+[1,2,3]
+
+[null,nothing]
+
+{0:2, 1:true}
+
+
 %%% 空表 %%%
 []         #! List
 {}         #! HashMap
+
+%%% 注意列表前需要加 ;; 分隔, 否则会被解释为 index %%%
+{a: false}
+[1]
+{a: true}
+;;[1]
 
 %%% 简单表 %%%
 [1,2,3,a,b]
