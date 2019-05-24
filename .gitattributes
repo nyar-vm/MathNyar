@@ -1,2 +1,2 @@
-*.java linguist-language=scala
+*.java linguist-language=groovy
 *.nyar linguist-language=arc

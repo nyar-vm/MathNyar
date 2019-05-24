@@ -10,26 +10,12 @@
 9223372036854775808
 (* decimal *)
 (* Decimal 类型 *)
-(*  ParserError: 
-    0.0
-*)
-(*  ParserError: 
-    0.
-*)
-(*  ParserError: 
-    .0
-*)
-(*  ParserError: 
-    3210.0
-*)
-123
-(*  ParserError: 
-    3210.
-*)
-(*  ParserError: 
-    .0
-*)
-123
+0.0
+0.0
+0.0
+3210.0123
+3210.0
+0.0123
 (* exponent *)
 (*  ParserError: 
     2*^2

@@ -48,6 +48,17 @@ class Translator extends NyarBaseVisitor[String] {
 			//System.out.print("Integer: " + ctx.getText + "\n")
 			return ctx.integer().getText
 		}
+		if (ctx.decimal() != null) {
+			//System.out.print("Decimal: " + ctx.getText + "\n")
+			val n = ctx.decimal().getText
+			if (n.substring(n.length - 1, n.length) == ".") {
+				return BigDecimal(n + "0").toString()
+			}
+			else {
+				return BigDecimal(n).toString()
+			}
+		}
+
 		System.out.print("Number: " + ctx.getText + "\n")
 		s"""(*  ParserError: \n${ctx.getText.replaceAll("(?m)^", "    ")}\n*)"""
 	}
